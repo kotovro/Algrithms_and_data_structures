@@ -13,9 +13,6 @@ import java.awt.event.MouseEvent;
 public class MainForm extends JFrame {
     private JPanel panelMain;
     private JTable tableMazeField;
-    private JLabel labelScore;
-    private JTable tableNextTurnBalls;
-
     private static final int DEFAULT_WALLS_DENSITY = 3;
     private static final int DEFAULT_COL_COUNT = 9;
     private static final int DEFAULT_ROW_COUNT = 9;
@@ -52,13 +49,9 @@ public class MainForm extends JFrame {
         SwingUtils.setShowMessageDefaultErrorHandler();
 
         tableMazeField.setRowHeight(DEFAULT_CELL_SIZE);
-        tableNextTurnBalls.setRowHeight(DEFAULT_CELL_SIZE);
         JTableUtils.initJTableForArray(tableMazeField, DEFAULT_CELL_SIZE, false, false, false, false);
-        JTableUtils.initJTableForArray(tableNextTurnBalls, DEFAULT_CELL_SIZE, false, false, false, false);
         tableMazeField.setIntercellSpacing(new Dimension(0, 0));
-        tableNextTurnBalls.setIntercellSpacing(new Dimension(0, 0));
         tableMazeField.setEnabled(false);
-        tableNextTurnBalls.setEnabled(false);
 
 
 
@@ -92,7 +85,7 @@ public class MainForm extends JFrame {
         updateWindowSize();
         updateView();
 
-        dialogParams = new ParamsDialog(params, tableMazeField, tableNextTurnBalls, e -> newMaze());
+        dialogParams = new ParamsDialog(params, tableMazeField, e -> newMaze());
 
         tableMazeField.addMouseListener(new MouseAdapter() {
             @Override
@@ -175,8 +168,7 @@ public class MainForm extends JFrame {
         SwingUtils.setFixedSize(
                 this,
                 tableMazeField.getWidth() + 2 * DEFAULT_GAP + 20,
-                tableMazeField.getHeight() + tableNextTurnBalls.getHeight() + labelScore.getHeight() +
-                        panelMain.getY() + menuSize + 1 * DEFAULT_GAP + 2 * DEFAULT_GAP + 50
+                tableMazeField.getHeight() + panelMain.getY() + menuSize + 1 * DEFAULT_GAP + 2 * DEFAULT_GAP + 50
         );
         this.setMaximumSize(null);
         this.setMinimumSize(null);

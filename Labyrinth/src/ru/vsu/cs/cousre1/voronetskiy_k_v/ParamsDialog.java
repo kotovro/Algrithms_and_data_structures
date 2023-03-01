@@ -27,7 +27,7 @@ public class ParamsDialog extends JDialog {
 
     private int oldCellSize;
 
-    private void resizeCells(JTable field, JTable nextBalls, int height, int width) {
+    private void resizeCells(JTable field, int height, int width) {
         field.setRowHeight(height);
         field.setRowHeight(0, 2);
         field.setRowHeight(field.getRowCount() - 1, 2);
@@ -36,13 +36,8 @@ public class ParamsDialog extends JDialog {
             field.getColumnModel().getColumn(i).setMaxWidth(width);
         }
         int cellSize = Math.min((field.getWidth() - 100) / params.getWallDensity(), params.getCellSize());
-        nextBalls.setRowHeight(cellSize);
-        for (int i = 0; i < nextBalls.getColumnCount(); i++) {
-            nextBalls.getColumnModel().getColumn(i).setMinWidth(cellSize);
-            nextBalls.getColumnModel().getColumn(i).setMaxWidth(cellSize);
-        }
     }
-    public ParamsDialog(MazeParams params, JTable gameFieldJTable, JTable nextBalls, ActionListener newGameAction) {
+    public ParamsDialog(MazeParams params, JTable gameFieldJTable, ActionListener newGameAction) {
         this.setTitle("Параметры");
         this.setContentPane(panelMain);
         this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -57,7 +52,7 @@ public class ParamsDialog extends JDialog {
         sliderCellSize.addChangeListener(e -> {
             int value = sliderCellSize.getValue();
             params.setCellsSize(value);
-            resizeCells(gameFieldJTable, nextBalls, value, value);
+            resizeCells(gameFieldJTable, value, value);
         });
         buttonCancel.addActionListener(e -> {
             JTableUtils.resizeJTableCells(gameFieldJTable, oldCellSize, oldCellSize);
