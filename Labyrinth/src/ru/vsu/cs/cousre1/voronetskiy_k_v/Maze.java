@@ -36,18 +36,20 @@ public class Maze {
      * (в данном случае цветов, 0 - пусто; создается / пересоздается при старте игры)
      */
     private boolean pathFound = false;
-    private int startPositionX = 0;
-    private int startPositionY = 0;
+    private int startPositionX = -1;
+    private int startPositionY = -1;
     private int finalPositionX = 0;
     private int finalPositionY = 0;
+    private int wallDensity = 1;
     private int[][] field = null;
 
     public Maze() {
     }
 
 
-    public void newMaze(int rowCount, int colCount) {
+    public void newMaze(int rowCount, int colCount, int wallDensity) {
         // создаем поле
+        this.wallDensity = wallDensity;
         field = new int[rowCount + 2][colCount + 2];
         for (int i = 0; i < rowCount + 2; i++) {
             field[i][0] = 15;
@@ -62,8 +64,8 @@ public class Maze {
                 createNewCell(i, j);
             }
         }
-        startPositionX = 0;
-        startPositionY = 0;
+        startPositionX = -1;
+        startPositionY = -1;
         finalPositionX = 0;
         finalPositionY = 0;
         pathFound = false;
@@ -71,69 +73,88 @@ public class Maze {
     private void createNewCell(int row, int col) {
         int isWallLeft = (field[row][col - 1] & 4) * 2;
         int isWallAbove = (field[row - 1][col] & 2) / 2;
-        int isWallBelow = (row == field.length - 2) ? 2 : rnd.nextInt(2) * 2;
-        int isWallRight = (col == field[0].length - 2) ? 4 : rnd.nextInt(2) * 4;
+        int isWallBelow = (row == field.length - 2) ? 2 : isWallCreated() * 2;
+        int isWallRight = (col == field[0].length - 2) ? 4 : isWallCreated() * 4;
         field[row][col] = isWallBelow + isWallAbove  + isWallLeft + isWallRight;
     }
+    private int isWallCreated(){
+        int random = rnd.nextInt(wallDensity + 1);
+        return random == 0 ? 1 : 0;
+    }
     public void selectCell(int x, int y) {
-        if (startPositionX < 1 && startPositionY < 1) {
+        if (startPositionX < 0 || startPositionY < 0) {
             startPositionX = x;
             startPositionY = y;
             finalPositionX = 0;
             finalPositionY = 0;
             field[startPositionX][startPositionY] += 16;
+        } else if (startPositionX == x && startPositionY == y) {
+            field[startPositionX][startPositionY] -= 16;
+            startPositionX = -1;
+            startPositionY = -1;
+            finalPositionX = 0;
+            finalPositionY = 0;
+            clearPreviousPaths(false);
         } else {
             finalPositionX = x;
             finalPositionY = y;
-            if (startPositionX > 0 && startPositionY > 0) {
-                if (!isPathFound(startPositionX, startPositionY)) {
-                     clearPreviousPaths();
-                }
+            clearPreviousPaths(false);
+            pathFound = isPathFound(startPositionX, startPositionY);
+            if (pathFound){
+                field[startPositionX][startPositionY] += 16;
             }
+            clearPreviousPaths(true);
+
         }
     }
 
-    private boolean isPathFound(int startX, int startY) {
-        if (startX == finalPositionX && startY == finalPositionY) {
-            field[startX][startY] += 32;
-            pathFound = true;
+    private boolean isPathFound(int startRow, int startColumn) {
+        if (startRow == finalPositionX && startColumn == finalPositionY) {
+            field[startRow][startColumn] += 32;
             return true;
         }
-        boolean isFreeAbove = (field[startX][startY] & 1) == 0;
-        boolean isFreeBelow = (field[startX][startY] & 2) == 0;
-        boolean isFreeLeft = (field[startX][startY] & 8) == 0;
-        boolean isFreeRight = (field[startX][startY] & 4) == 0;
-        if (startX != startPositionX || startY != startPositionY) {
-            if (field[startX][startY] >= 16) {
-                return false;
-            }
-            field[startX][startY] += 16;
+        boolean isFreeAbove = !isWallAbove(startRow, startColumn);
+        boolean isFreeBelow = !isWallBelow(startRow, startColumn);
+        boolean isFreeLeft = !isWallLeft(startRow, startColumn);
+        boolean isFreeRight = !isWallRight(startRow, startColumn);
+
+        if (field[startRow][startColumn] >= 16) {
+            return false;
         }
-        boolean isPathFound = isFreeBelow && isPathFound(startX + 1, startY) ||
-                isFreeAbove && isPathFound(startX - 1, startY) ||
-                isFreeRight && isPathFound(startX, startY + 1) ||
-                isFreeLeft && isPathFound(startX, startY - 1);
+
+        field[startRow][startColumn] |= 16;
+        boolean isPathFound =
+                isFreeBelow && isPathFound(startRow + 1, startColumn) ||
+                isFreeAbove && isPathFound(startRow - 1, startColumn) ||
+                isFreeRight && isPathFound(startRow, startColumn + 1) ||
+                isFreeLeft && isPathFound(startRow, startColumn - 1);
         if (isPathFound) {
-            field[startX][startY] += 32;
+            field[startRow][startColumn] &= 15;
+            field[startRow][startColumn] |= 32;
         }
+
         return isPathFound;
     }
 
-    public void clearPreviousPaths() {
+    public void clearPreviousPaths(boolean isTemp) {
         for (int i = 1; i < field.length - 1; i++) {
             for (int j = 1; j < field[0].length - 1; j++) {
-                field[i][j] &= 15;
+                field[i][j] &= (isTemp ? 47 : 15);
             }
         }
-        startPositionX = 0;
-        startPositionY = 0;
-        finalPositionX = 0;
-        finalPositionY = 0;
-        pathFound = false;
+        if (isTemp){
+            finalPositionX = 0;
+            finalPositionY = 0;
+        }
     }
 
     public boolean getPathNotFound() {
-        return (startPositionX == 0 && startPositionY == 0 && finalPositionX == 0 && finalPositionY == 0);
+        boolean pathNotFound = startPositionX >= 0 && startPositionY >= 0 && (field[startPositionX][startPositionY] < 16);
+        if (pathNotFound) {
+            startPositionX = -1;
+            startPositionY = -1;
+        }
+        return pathNotFound;
     }
     public boolean isSelected(int x, int y) {
         return x == startPositionX && y == startPositionY;
@@ -154,9 +175,20 @@ public class Maze {
         return field == null ? 0 : field[0].length;
     }
 
-    public int getCell(int row, int col) {
-        return (row < 0 || row >= getRowCount() || col < 0 || col >= getColCount()) ? 0 : field[row][col];
+    public boolean isWallAbove(int row, int column) {
+        return (field[row][column] & 1) > 0;
+    }
+    public boolean isWallBelow(int row, int column) {
+        return (field[row][column] & 2) > 0;
+    }
+    public boolean isWallRight(int row, int column) {
+        return (field[row][column] & 4) > 0;
+    }
+    public boolean isWallLeft(int row, int column) {
+        return (field[row][column] & 8) > 0;
     }
 
-
+    public boolean isPath(int x, int y) {
+        return field[x][y] > 15;
+    }
 }

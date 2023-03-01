@@ -11,18 +11,17 @@ public class ParamsDialog extends JDialog {
     private JPanel panelMain;
     private JSpinner spinnerColCount;
     private JSpinner spinnerRowCount;
-    private JSpinner spinnerColorCount;
-    private JSpinner spinnerNextBallsCount;
+    private JSpinner wallDensity;
     private JSlider sliderCellSize;
     private JButton buttonCancel;
     private JButton buttonNewGame;
     private JButton buttonOk;
-    private JLabel labelNextBalls;
+    private JLabel labelWallDensity;
 
 
 
 
-    private GameParams params;
+    private MazeParams params;
     private JTable gameFieldJTable;
     private ActionListener newGameAction;
 
@@ -36,14 +35,14 @@ public class ParamsDialog extends JDialog {
             field.getColumnModel().getColumn(i).setMinWidth(width);
             field.getColumnModel().getColumn(i).setMaxWidth(width);
         }
-        int cellSize = Math.min((field.getWidth() - 100) / params.getNextBallsCount(), params.getCellSize());
+        int cellSize = Math.min((field.getWidth() - 100) / params.getWallDensity(), params.getCellSize());
         nextBalls.setRowHeight(cellSize);
         for (int i = 0; i < nextBalls.getColumnCount(); i++) {
             nextBalls.getColumnModel().getColumn(i).setMinWidth(cellSize);
             nextBalls.getColumnModel().getColumn(i).setMaxWidth(cellSize);
         }
     }
-    public ParamsDialog(GameParams params, JTable gameFieldJTable, JTable nextBalls, ActionListener newGameAction) {
+    public ParamsDialog(MazeParams params, JTable gameFieldJTable, JTable nextBalls, ActionListener newGameAction) {
         this.setTitle("Параметры");
         this.setContentPane(panelMain);
         this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -73,8 +72,7 @@ public class ParamsDialog extends JDialog {
         buttonOk.addActionListener(e -> {
             params.setRowCount((int) spinnerRowCount.getValue());
             params.setColCount((int) spinnerColCount.getValue());
-            params.setColorCount((int) spinnerColorCount.getValue());
-            params.setNextBallsCount((int) spinnerNextBallsCount.getValue());
+            params.setWallDensity((int) wallDensity.getValue());
             oldCellSize = gameFieldJTable.getRowHeight();
             this.setVisible(false);
         });
@@ -84,9 +82,8 @@ public class ParamsDialog extends JDialog {
     public void updateView() {
         spinnerRowCount.setValue(params.getRowCount());
         spinnerColCount.setValue(params.getColCount());
-        spinnerColorCount.setValue(params.getColorCount());
         sliderCellSize.setValue(gameFieldJTable.getRowHeight());
-        spinnerNextBallsCount.setValue(params.getNextBallsCount());
+        wallDensity.setValue(params.getWallDensity());
     }
 
 }

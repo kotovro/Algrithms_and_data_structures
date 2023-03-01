@@ -16,11 +16,9 @@ public class MainForm extends JFrame {
     private JLabel labelScore;
     private JTable tableNextTurnBalls;
 
-    private static final int DEFAULT_NEXT_BALLS_COUNT = 3;
+    private static final int DEFAULT_WALLS_DENSITY = 3;
     private static final int DEFAULT_COL_COUNT = 9;
     private static final int DEFAULT_ROW_COUNT = 9;
-    private static final int DEFAULT_COLOR_COUNT = 7;
-
     private static final int DEFAULT_GAP = 10;
     private static final int DEFAULT_CELL_SIZE = 50;
 
@@ -37,13 +35,13 @@ public class MainForm extends JFrame {
             Color.GRAY
     };
 
-    private GameParams params = new GameParams(DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT, DEFAULT_COLOR_COUNT, DEFAULT_NEXT_BALLS_COUNT, DEFAULT_CELL_SIZE);
+    private MazeParams params = new MazeParams(DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT, DEFAULT_WALLS_DENSITY, DEFAULT_CELL_SIZE);
     private Maze maze = new Maze();
     private ParamsDialog dialogParams;
 
 
     public MainForm() {
-        this.setTitle("Lines 98");
+        this.setTitle("Maze");
         this.setContentPane(panelMain);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
@@ -89,12 +87,12 @@ public class MainForm extends JFrame {
             }
         });
 
-        newGame();
+        newMaze();
 
         updateWindowSize();
         updateView();
 
-        dialogParams = new ParamsDialog(params, tableMazeField, tableNextTurnBalls, e -> newGame());
+        dialogParams = new ParamsDialog(params, tableMazeField, tableNextTurnBalls, e -> newMaze());
 
         tableMazeField.addMouseListener(new MouseAdapter() {
             @Override
@@ -130,10 +128,10 @@ public class MainForm extends JFrame {
     private JMenuBar createMenuBar() {
         JMenuBar menuBarMain = new JMenuBar();
 
-        JMenu menuGame = new JMenu("Игра");
+        JMenu menuGame = new JMenu("Настройки");
         menuBarMain.add(menuGame);
-        menuGame.add(createMenuItem("Новая", "ctrl+N", null, e -> {
-            newGame();
+        menuGame.add(createMenuItem("Новый", "ctrl+N", null, e -> {
+            newMaze();
         }));
         menuGame.add(createMenuItem("Параметры", "ctrl+P", null, e -> {
             dialogParams.updateView();
@@ -154,24 +152,15 @@ public class MainForm extends JFrame {
 
         JMenu menuHelp = new JMenu("Справка");
         menuBarMain.add(menuHelp);
-        menuHelp.add(createMenuItem("Правила", "ctrl+R", null, e -> {
+        menuHelp.add(createMenuItem("Справка", "ctrl+R", null, e -> {
             SwingUtils.showInfoMessageBox("""
-                            На поле имеются шарики разных цветов. При статре игры их столько, сколько указал игрок (по умолчанию - 3).\040
-                            За один ход можно сдвинуть 1 шарик.
-                            Перемещайте их так, чтобы они образовывали линии - по горизонтали, вертикали, или диагонали - одного цвета.
-                            Шарики могут двигаться только по свободным клеткам по горизонтали и вертикали.\040
-                            Минимальное количество шариков в линии - 5.\040
-                            При этом, если число 'сброшенных' шариков больше пяти, начисляется гораздо больше очков при таокм 'сбросе'.\040
-                            Если  после хода игрока не было сброшено ни одной линии или они были сброшены при добывлении шариков,\040
-                            то в случайные свободные клетки на поле будут добавлены шарики.\040
-                            Их цвет которых известен (он уазан в 'окне' над игровым полем), при этом если они были сброшены вторым спосом, то будут начислены очки.\040
-                            Если же игрок сбросил линию, то ему предорсьвляетмя ещё один ход и шарики новые не добавляются.\040
-                            Игра заканчиваентся, если невозможно сдеалть ход, то есть всё поле заполнено."""
-                    , "Правила");
+                            Лабиринт и поиск путей в нём из\040
+                            произвольной клетки в произвольную другую."""
+                    , "Справка");
         }));
         menuHelp.add(createMenuItem("О программе", "ctrl+A", null, e -> {
             SwingUtils.showInfoMessageBox(
-                    "Игра lines 98" +
+                    "Лабиринт" +
                             "\n\nАвтор: Воронецкий К.В." +
                             "\nE-mail: kootvoro@gmail.com",
                     "О программе"
@@ -208,42 +197,41 @@ public class MainForm extends JFrame {
     }
 
     private void paintCell(int row, int column, Graphics2D g2d, int cellWidth, int cellHeight) {
-        int cellValue = maze.getCell(row, column);
         if (row == 0 || row == maze.getRowCount() - 1 || column == 0 || column == maze.getColCount() - 1){
             return;
         }
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int size = Math.min(cellWidth, cellHeight);
-        if ((cellValue & 1) > 0) {
+        if (maze.isWallAbove(row, column)) {
             g2d.drawLine(0, 0, size, 0);
         }
-        if ((cellValue & 2) > 0) {
+        if (maze.isWallBelow(row, column)) {
             g2d.drawLine(0, size, size, size);
         }
-        if ((cellValue & 4) > 0) {
+        if (maze.isWallRight(row, column)) {
             g2d.drawLine(size, 0, size, size);
         }
-        if ((cellValue & 8) > 0) {
+        if (maze.isWallLeft(row, column)) {
             g2d.drawLine(0, 0, 0, size);
         }
 
-        if (cellValue < 32) {
+        if (!maze.isPath(row, column)) {
             return;
         }
-        Color color = COLORS[9];
+        Color color = maze.isSelected(row, column) ? Color.DARK_GRAY : Color.RED;
 
 
-        int bound = (int) Math.round(size * 0.2);
+        int bound = (int) Math.round(size * 0.4);
 
         g2d.setColor(color);
         g2d.fillRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, size, size);
-        g2d.setColor(maze.isSelected(row, column) ? Color.DARK_GRAY : Color.LIGHT_GRAY);
+        g2d.setColor(maze.isSelected(row, column) ? Color.DARK_GRAY : Color.YELLOW);
         g2d.drawRoundRect(bound, bound, size - 2 * bound, size - 2 * bound, size, size);
     }
     private void validateParams() {
-        if (params.getNextBallsCount() < 1) {
-            params.setNextBallsCount(1);
+        if (params.getWallDensity() < 1) {
+            params.setWallDensity(1);
         }
         if (params.getColorCount() < 1) {
             params.setColorCount(1);
@@ -259,9 +247,9 @@ public class MainForm extends JFrame {
         }
 
     }
-    private void newGame() {
+    private void newMaze() {
         validateParams();
-        maze.newMaze(params.getRowCount(), params.getColCount());
+        maze.newMaze(params.getRowCount(), params.getColCount(), params.getWallDensity());
         JTableUtils.resizeJTable(tableMazeField,
                 maze.getRowCount(), maze.getColCount(),
                 tableMazeField.getRowHeight(), tableMazeField.getRowHeight()
