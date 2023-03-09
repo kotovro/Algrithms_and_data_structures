@@ -5,35 +5,27 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 public class RunSolution {
-    public static int[] runSolution(int[] inArray, String outFile) {
-        int[] res = ArrayUtils.toPrimitive(
-                Solution.process(
-                            Arrays.stream(inArray).boxed().collect(Collectors.toCollection(LinkedList::new)))
-                        .toArray(new Integer[0]));
-        if (outFile != null && outFile.length() != 0) {
-            try {
-                ArrayUtils.writeArrayToFile(outFile, res);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return res;
+    public static int runSolution(int[] inArray, String outFile) {
+        SimpleLinkedList<Integer> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(inArray));
+        SimpleLinkedList<Integer>.SimpleLinkedListNode<Integer> res = temp.getSolution(val ->
+                Integer.compare(val, 0)
+         );
+        return res.value.intValue();
     }
 
-    public static int[] runSolution(String inFile, String outFile) {
+    public static int runSolution(String inFile, String outFile) {
         int[] input = ArrayUtils.readIntArrayFromFile(inFile);
-        int[] res = ArrayUtils.toPrimitive(
-                Solution.process(
-                                Arrays.stream(input).boxed().collect(Collectors.toCollection(LinkedList::new)))
-                        .toArray(new Integer[0]));
-
-        if (outFile != null && outFile.length() != 0) {
-            try {
-                ArrayUtils.writeArrayToFile(outFile, res);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return res;
+        SimpleLinkedList<Integer> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(input));
+        SimpleLinkedList<Integer>.SimpleLinkedListNode<Integer> res = temp.getSolution(val ->
+                Integer.compare(val, 0)
+        );
+//        if (outFile != null && outFile.length() != 0) {
+//            try {
+//                ArrayUtils.writeArrayToFile(outFile, res);
+//            } catch (Exception e) {
+//                return null;
+//            }
+//        }
+        return res.value.intValue();
     }
 }

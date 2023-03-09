@@ -1,9 +1,6 @@
-package ru.cs.vsu.voronetskiy_k_v.Task02;
+package ru.vsu.cs.course1;
 
-import java.lang.reflect.Array;
-import java.util.Comparator;
 import java.util.Iterator;
-import java.util.function.Function;
 
 public class SimpleLinkedList<T> implements Iterable<T> {
 
@@ -13,7 +10,7 @@ public class SimpleLinkedList<T> implements Iterable<T> {
         }
     }
 
-    public class SimpleLinkedListNode<T> {
+    private class SimpleLinkedListNode<T> {
         public T value;
         public SimpleLinkedListNode<T> next;
 
@@ -157,58 +154,6 @@ public class SimpleLinkedList<T> implements Iterable<T> {
         return getNode(index).value;
     }
 
-    public SimpleLinkedList(T[] array) {
-        for (int i = 0; i < array.length; i++) {
-            this.addLast(array[i]);
-        }
-    }
-
-    public T[] listToArray(SimpleLinkedList<T> list) {
-        T value = list.head.value;
-        T[] res  = (T[]) Array.newInstance(value.getClass().getComponentType(), list.size());
-        int i = 0;
-        for (T node: list) {
-            res[i] = node;
-            i++;
-        }
-        return res;
-    }
-
-    public int[] listToIntArray(SimpleLinkedList<Integer> list) {
-        int[] res = new int[list.size()];
-        int i = 0;
-        for (Integer node: list) {
-            res[i] = node;
-            i++;
-        }
-        return res;
-    }
-
-    public SimpleLinkedListNode<T> getSolution(Function<T, Integer> comparator) {
-        SimpleLinkedListNode<T> curItem = this.head;
-        int maxNegativeCount = 0;
-        int curNegativeCount = 0;
-        SimpleLinkedListNode<T> candidate = null;
-        SimpleLinkedListNode<T> res = null;
-        while (curItem.next != null) {
-            int comparisonRes = comparator.apply(curItem.value);
-            if (comparisonRes >= 0) {
-                if (candidate != null && curNegativeCount >= maxNegativeCount) {
-                    res = candidate;
-                    maxNegativeCount = curNegativeCount;
-                }
-                candidate = comparisonRes > 0 ? curItem : null;
-                curNegativeCount = 0;
-            } else if (candidate != null) {
-                curNegativeCount += 1;
-            }
-            curItem = curItem.next;
-        }
-        if (candidate != null && curNegativeCount >= maxNegativeCount) {
-            res = candidate;
-        }
-        return res;
-    }
 
     @Override
     public Iterator<T> iterator() {

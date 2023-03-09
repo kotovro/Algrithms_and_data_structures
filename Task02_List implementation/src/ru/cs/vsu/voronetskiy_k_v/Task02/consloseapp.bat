@@ -1,3 +1,3 @@
 @echo off
 
-java -jar "%dp~0/out/artifacts/task_09_jar/task_09.jar" %*
+java -jar "%dp~0/out/artifacts/Task_02_List_implementation_jar/Task_02_List_implementation.jar" %*
