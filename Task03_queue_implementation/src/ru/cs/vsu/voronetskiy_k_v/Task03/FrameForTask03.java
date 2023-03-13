@@ -82,7 +82,6 @@ public class FrameForTask03 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (fileChooserOpen.showOpenDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, false);
                         int[] inArr = ArrayUtils.readIntArrayFromFile(fileChooserOpen.getSelectedFile().getPath());
                         JTableUtils.writeArrayToJTable(tableForInputArr, inArr);
                     }
