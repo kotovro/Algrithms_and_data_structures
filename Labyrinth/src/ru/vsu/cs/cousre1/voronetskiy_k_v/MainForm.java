@@ -32,6 +32,9 @@ public class MainForm extends JFrame {
             Color.GRAY
     };
 
+    private Maze.Room room;
+    private Integer roomRow;
+    private Integer roomCol;
     private MazeParams params = new MazeParams(DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT, DEFAULT_WALLS_DENSITY, DEFAULT_CELL_SIZE);
     private Maze maze = new Maze();
     private ParamsDialog dialogParams;
@@ -93,17 +96,28 @@ public class MainForm extends JFrame {
                 int row = tableMazeField.rowAtPoint(e.getPoint());
                 int col = tableMazeField.columnAtPoint(e.getPoint());
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    maze.leftMouseClick(row, col);
+                    maze.selectCell(row, col);
                     updateView();
                     if (maze.getPathNotFound()) {
                         SwingUtils.showInfoMessageBox(
                                 "Путь не найден"
                         );
                     }
+                } else if (SwingUtilities.isRightMouseButton(e)) {
+                    roomRow = row;
+                    roomCol = col;
+                    room =  maze.readRoom(roomRow, roomCol);
+                    RoomDialog rd = new RoomDialog(room, a -> updateRoom());
+                    rd.setVisible(true);
                 }
 
             }
         });
+    }
+
+    private void updateRoom() {
+        maze.updateRoom(roomRow, roomCol, room);
+        updateView();
     }
 
     private JMenuItem createMenuItem(String text, String shortcut, Character mnemonic, ActionListener listener) {
