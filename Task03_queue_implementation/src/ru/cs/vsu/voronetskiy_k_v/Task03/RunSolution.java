@@ -2,35 +2,65 @@ package ru.cs.vsu.voronetskiy_k_v.Task03;
 
 import ru.cs.vsu.voronetskiy_k_v.Task03.utils.ArrayUtils;
 
-public class RunSolution {
-    public static SimpleQueue<Integer> runSolution(int[] inArray) {
-        SimpleQueue<Integer> temp = new SimpleQueue<>(ArrayUtils.toGeneric(inArray), true);
-        SimpleQueue<Integer> res = new SimpleQueue<>();
-        while (temp.size() > 0) {
-            try {
-                Integer el = temp.pop();
-                res.push(el);
-                if (temp.size() > 0) {
-                    res.exchange();
-                }
-            } catch (Exception e) {
+import javax.swing.plaf.IconUIResource;
+import java.util.LinkedList;
 
+public class RunSolution {
+
+    public static int[] runSolution(ISimpleQueue queue, int[] inArray) {
+        for (int i = inArray.length - 1; i > -1; i--) {
+            try {
+                if (queue.count() > 0) {
+                    Integer tmp = (Integer) queue.remove();
+                    queue.add(tmp);
+                }
+                queue.add(inArray[i]);
+            } catch (Exception e) {
+                int test = 101;
             }
         }
+        return ArrayUtils.toPrimitive((Integer[]) queue.toArray());
+    }
+
+    public static int[] runSolutionCustom(int[] inArray) {
+        SimpleQueueC<Integer> solutionQueue = new SimpleQueueC<>();
+        return runSolution(solutionQueue, inArray);
+    }
+
+    public static int[] runSolutionStd(int[] inArray) {
+        SimpleQueueStd<Integer> solutionQueue = new SimpleQueueStd<>();
+        return runSolution(solutionQueue, inArray);
+    }
+
+    public static int[] runSolution(String inFile, String outFile) {
+        int[] input = ArrayUtils.readIntArrayFromFile(inFile);
+        int[] res = RunSolution.runSolutionCustom(input);
         return res;
     }
 
-    public static SimpleQueue<Integer> runSolution(String inFile, String outFile) {
-        int[] input = ArrayUtils.readIntArrayFromFile(inFile);
-        SimpleQueue<Integer> res = RunSolution.runSolution(input);
+    public static int[] runCheck(ISimpleQueue queue) {
+        int[] res = new int[queue.count()];
+        int i = 0;
+        try {
+            while (queue.count() > 0) {
+                res[i] = (Integer) queue.remove();
+                i++;
+                if (queue.count() > 0) {
+                    queue.add(queue.remove());
+                }
+            }
+        } catch (Exception ex ) {
+        }
 
-//        if (outFile != null && outFile.length() != 0) {
-//            try {
-//                ArrayUtils.writeArrayToFile(outFile, res);
-//            } catch (Exception e) {
-//                return null;
-//            }
-//        }
         return res;
+    }
+    public static int[] runCheckC(int[] arr) {
+        SimpleQueueC<Integer> queue = new SimpleQueueC<>(ArrayUtils.toGeneric(arr));
+        return runCheck(queue);
+    }
+
+    public static int[] runCheckStd(int[] arr) {
+        SimpleQueueStd<Integer> queue = new SimpleQueueStd<>(ArrayUtils.toGeneric(arr));
+        return runCheck(queue);
     }
 }

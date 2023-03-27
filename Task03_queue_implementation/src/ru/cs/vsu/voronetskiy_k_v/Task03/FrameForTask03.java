@@ -24,8 +24,14 @@ public class FrameForTask03 extends JFrame {
     private JPanel buttonsPanel;
     private JButton buttonSave;
     private JButton buttonOpen;
+    private JButton runBuiltInSolutionButton;
     private JScrollPane paneForResult;
     private JTable tableResult;
+    private JButton runBuiltInsButton;
+    private JTable tableCheck;
+    private JScrollPane panelForCheck;
+    private JButton customCheckButton;
+    private JButton builtInsCheckButton;
     private JFileChooser fileChooserOpen;
     private JFileChooser fileChooserSave;
 
@@ -62,21 +68,55 @@ public class FrameForTask03 extends JFrame {
             JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, true);
         }
         JTableUtils.initJTableForArray(tableResult, 40, false, false, false, false);
+        JTableUtils.initJTableForArray(tableCheck, 40, false, false, false, false);
         paneForInput.setMinimumSize(new Dimension(100, 100));
         tableForInputArr.setRowHeight(50);
         tableResult.setRowHeight(50);
+        tableCheck.setRowHeight(50);
         btnRunSolution.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     int[] inArr = JTableUtils.readIntArrayFromJTable(tableForInputArr);
-                    SimpleQueue<Integer> res = RunSolution.runSolution(inArr);
-                    JTableUtils.writeArrayToJTable(tableResult, ArrayUtils.toPrimitive(res.listToArray()));
+                    int[] res = RunSolution.runSolutionCustom(inArr);
+                    JTableUtils.writeArrayToJTable(tableResult, res);
                 } catch (Exception ex) {
                 }
             }
         });
-        this.pack();
+        runBuiltInsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int[] inArr = JTableUtils.readIntArrayFromJTable(tableForInputArr);
+                    int[] res = RunSolution.runSolutionStd(inArr);
+                    JTableUtils.writeArrayToJTable(tableResult, res);
+                } catch (Exception ex) {
+                }
+            }
+        });
+        builtInsCheckButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int[] inArr = JTableUtils.readIntArrayFromJTable(tableResult);
+                    int[] res = RunSolution.runCheckStd(inArr);
+                    JTableUtils.writeArrayToJTable(tableCheck, res);
+                } catch (Exception ex) {
+                }
+            }
+        });
+        customCheckButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int[] inArr = JTableUtils.readIntArrayFromJTable(tableResult);
+                    int[] res = RunSolution.runCheckC(inArr);
+                    JTableUtils.writeArrayToJTable(tableCheck, res);
+                } catch (Exception ex) {
+                }
+            }
+        });
         buttonOpen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -95,13 +135,15 @@ public class FrameForTask03 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (fileChooserSave.showSaveDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        int[] inArr = JTableUtils.readIntArrayFromJTable(tableForInputArr);
+                        int[] inArr = JTableUtils.readIntArrayFromJTable(tableResult);
                         ArrayUtils.writeArrayToFile(fileChooserSave.getSelectedFile().getPath(), inArr);
                     }
                 } catch (Exception ex) {};
             }
         });
+        this.pack();
     }
+
 
     private void createUIComponents() {
         // TODO: place custom component creation code here

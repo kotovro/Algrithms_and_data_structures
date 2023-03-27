@@ -32,7 +32,7 @@ public class ConsoleApp {
                 System.err.println("Unexpected error");
             }
         } else {
-            int[] result = ArrayUtils.toPrimitive(RunSolution.runSolution(ia.inFile, ia.outFile).listToArray());
+            int[] result = RunSolution.runSolution(ia.inFile, ia.outFile);
             System.out.println(ArrayUtils.toString(result));
             if (result.length < 1) {
                 System.err.println("File IO error.");
