@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact name="Task_04_heap_sort:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Task_04_heap_sort_jar</output-path>
+    <root id="root">
+      <element id="archive" name="Task_04_heap_sort.jar">
+        <element id="module-output" name="Task_04_heap_sort" />
+      </element>
+    </root>
+  </artifact>
+</component>
