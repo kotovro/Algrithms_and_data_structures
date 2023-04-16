@@ -1,1 +1,6 @@
-java -jar ../../../../../out/artifacts/task_09_jar/task_09.jar -w 
+@echo off
+
+java -jar "../../../../../../out/artifacts/Task_04_heap_sort_jar/Task_04_heap_sort.jar" %*
+
+
+rem java -jar ../../../../../../out/artifacts/Task_04_heap_sort_jar/Task_04_heap_sort.jar -w 
