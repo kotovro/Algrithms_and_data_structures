@@ -36,7 +36,7 @@ public class FrameForTask04 extends JFrame {
     public FrameForTask04(String inFile, String outFile) throws IOException {
         this.setContentPane(panelMain);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.setTitle("Task3 Queue implementation");
+        this.setTitle("Task4 Heap sort implementation");
         fileChooserOpen = new JFileChooser();
         fileChooserSave = new JFileChooser();
         fileChooserOpen.setCurrentDirectory(new File("."));
