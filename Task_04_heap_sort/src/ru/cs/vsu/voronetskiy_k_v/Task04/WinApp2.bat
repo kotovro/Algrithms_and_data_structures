@@ -1,0 +1,1 @@
+java -jar ../../../../../out/artifacts/task_09_jar/task_09.jar -w 
