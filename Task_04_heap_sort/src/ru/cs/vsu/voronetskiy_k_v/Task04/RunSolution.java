@@ -1,6 +1,6 @@
 package src.ru.cs.vsu.voronetskiy_k_v.Task04;
 
-import ru.cs.vsu.voronetskiy_k_v.Task03.utils.ArrayUtils;
+import src.ru.cs.vsu.voronetskiy_k_v.Task04.utils.ArrayUtils;
 
 public class RunSolution {
 

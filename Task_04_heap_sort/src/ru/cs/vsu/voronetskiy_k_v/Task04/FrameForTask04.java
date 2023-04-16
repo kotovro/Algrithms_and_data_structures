@@ -1,8 +1,8 @@
 package src.ru.cs.vsu.voronetskiy_k_v.Task04;
 
-import ru.cs.vsu.voronetskiy_k_v.Task03.utils.ArrayUtils;
-import ru.cs.vsu.voronetskiy_k_v.Task03.utils.JTableUtils;
-import ru.cs.vsu.voronetskiy_k_v.Task03.utils.SwingUtils;
+import src.ru.cs.vsu.voronetskiy_k_v.Task04.utils.ArrayUtils;
+import src.ru.cs.vsu.voronetskiy_k_v.Task04.utils.JTableUtils;
+import src.ru.cs.vsu.voronetskiy_k_v.Task04.utils.SwingUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
