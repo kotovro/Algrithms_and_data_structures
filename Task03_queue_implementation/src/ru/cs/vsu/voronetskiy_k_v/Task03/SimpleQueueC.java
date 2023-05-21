@@ -2,7 +2,7 @@ package ru.cs.vsu.voronetskiy_k_v.Task03;
 
 import java.lang.reflect.Array;
 
-public class SimpleQueueC<T> implements ISimpleQueue {
+public class SimpleQueueC<T> implements ISimpleQueue<T> {
 
     private int count;
     private SimpleNode head = null;
@@ -17,7 +17,7 @@ public class SimpleQueueC<T> implements ISimpleQueue {
         Class clazz = head.value.getClass();
         T[] res = (T[])Array.newInstance(clazz, count);
         int i = count;
-        SimpleNode<T> tmp = head;
+        SimpleNode tmp = head;
         while (i > 0) {
             res[i - 1] = tmp.value;
             tmp = tmp.next;
@@ -27,13 +27,13 @@ public class SimpleQueueC<T> implements ISimpleQueue {
     }
 
 
-    private class SimpleNode<T> {
+    private class SimpleNode {
         private T value;
-        private SimpleNode<T> next;
+        private SimpleNode next;
 
 
 
-        private SimpleNode(T value, SimpleNode<T> next) {
+        private SimpleNode(T value, SimpleNode next) {
             this.value = value;
             this.next = next;
         }
@@ -43,7 +43,7 @@ public class SimpleQueueC<T> implements ISimpleQueue {
     }
 
     @Override
-    public void add(Object value) {
+    public void add(T value) {
         SimpleNode temp  = new SimpleNode(value, null);
         if (count != 0) {
             tail.next = temp;
@@ -56,15 +56,15 @@ public class SimpleQueueC<T> implements ISimpleQueue {
     }
 
     @Override
-    public Object remove() {
-        Object res = head.value;
+    public T remove() {
+        T res = head.value;
         head = head.next;
         count--;
         return res;
     }
 
     @Override
-    public Object element() {
+    public T element() {
         return head.value;
     }
 

@@ -12,7 +12,6 @@ public class RunSolution {
          );
         return res.value.intValue();
     }
-
     public static int runSolution(String inFile, String outFile) {
         int[] input = ArrayUtils.readIntArrayFromFile(inFile);
         SimpleLinkedList<Integer> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(input));
@@ -29,3 +28,4 @@ public class RunSolution {
         return res.value.intValue();
     }
 }
+

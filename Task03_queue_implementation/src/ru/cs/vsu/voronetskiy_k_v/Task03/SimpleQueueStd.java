@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 
-public class SimpleQueueStd<T>  implements ISimpleQueue {
+public class SimpleQueueStd<T>  implements ISimpleQueue<T> {
 
     private LinkedList<T> list;
 
@@ -19,17 +19,17 @@ public class SimpleQueueStd<T>  implements ISimpleQueue {
     }
 
     @Override
-    public void add(Object value) {
+    public void add(T value) {
         list.add((T)value);
     }
 
     @Override
-    public Object remove() throws Exception {
+    public T remove() throws Exception {
         return list.remove();
     }
 
     @Override
-    public Object element() throws Exception {
+    public T element() throws Exception {
         return list.element();
     }
 

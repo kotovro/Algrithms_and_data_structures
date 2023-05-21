@@ -327,5 +327,12 @@ public class Maze {
     public LinkedList<int[]> getLastPathFound() {
         return lastPathFound;
     }
+    //TODO
+    // Though the task is accepted, we could do the following:
+    // Remove path search method from Maze.java class
+    // and add it to the other entity
+    //  This entity have to implement method? to which we pass
+    // some maze and start/end points as argments
+    //
 
 }
