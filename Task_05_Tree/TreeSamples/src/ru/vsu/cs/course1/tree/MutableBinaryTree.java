@@ -12,6 +12,7 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
         public T value;
         public MutableTreeNode left;
         public MutableTreeNode right;
+        private boolean isSorted = false;
         private Color color = Color.BLACK;
 
         public MutableTreeNode(T value, MutableTreeNode left, MutableTreeNode right) {
@@ -44,15 +45,25 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
         }
         @Override
         public Color getColor() {
+            if (this.isSorted) {
+             return Color.GREEN;
+            }
             return this.color;
         }
         public void setColor(Color color) {
             this.color = color;
         }
+
+        public void setSorted(boolean b) {
+            this.isSorted = b;
+        }
+        public boolean getSorted() {
+            return this.isSorted;
+        }
     }
 
     protected MutableTreeNode root = null;
-
+    private boolean isMaxHeap = false;
     protected Function<String, T> fromStrFunc;
     protected Function<T, String> toStrFunc;
 
@@ -68,7 +79,12 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
     public MutableBinaryTree() {
         this(null);
     }
-
+    public void setIsMaxHeap(boolean b) {
+        this.isMaxHeap = b;
+    }
+    public boolean getIsMaxHeap() {
+        return this.isMaxHeap;
+    }
     @Override
     public TreeNode<T> getRoot() {
         return root;

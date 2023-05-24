@@ -13,6 +13,7 @@ import ru.vsu.cs.util.SwingUtils;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.MutableTreeNode;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -45,8 +46,9 @@ public class TreeDemoFrame extends JFrame {
     BinaryTree<Integer> tree = new MutableBinaryTree<>();
     private javax.swing.Timer timer = new javax.swing.Timer(500, ae -> makeMaxHeap());
     private Stack<BinaryTree.TreeNode<Integer>> animationQueue = new Stack<>();
+    private Stack<BinaryTree.TreeNode<Integer>> sortQueue = new Stack<>();
     private  BinaryTree.TreeNode<Integer> lastNode = null;
-
+    private boolean isMakingMaxHeap = false;
     public TreeDemoFrame() {
         this.setTitle("Двоичные деревья");
         this.setContentPane(panelMain);
@@ -94,24 +96,37 @@ public class TreeDemoFrame extends JFrame {
         });
 
         buttonMakeMaxHeap.addActionListener(actionEvent -> {
-
-            for (BinaryTree.TreeNode<Integer> node : BinaryTreeAlgorithms.byLevelNodes(tree.getRoot())) {
-                animationQueue.push(node);
-            }
-            timer.start();
-        });
-        buttonSort.addActionListener(actionEvent -> {
-            if (!(tree instanceof BSTree)) {
-                SwingUtils.showInfoMessageBox("Текущее дерево не является деревом поиска!");
+            if (isMakingMaxHeap) {
+                SwingUtils.showInfoMessageBox("Построение максимальной кучи уже идёт!");
                 return;
             }
-//            try {
-//                int value = Integer.parseInt(spinnerSingleValue.getValue().toString());
-//                ((BSTree<Integer>) tree).remove(value);
-//                repaintTree();
-//            } catch (Exception ex) {
-//                SwingUtils.showErrorMessageBox(ex);
-//            }
+            animationQueue.clear();
+            sortQueue.clear();
+
+            for (BinaryTree.TreeNode<Integer> node : BinaryTreeAlgorithms.byLevelNodes(tree.getRoot())) {
+                ((MutableBinaryTree<Integer>.MutableTreeNode) node).setSorted(false);
+                animationQueue.push(node);
+            }
+
+            isMakingMaxHeap = true;
+
+            timer.start();
+
+        });
+        buttonSort.addActionListener(actionEvent -> {
+            if (!((MutableBinaryTree<Integer>) tree).getIsMaxHeap()) {
+                SwingUtils.showInfoMessageBox("Текущее дерево не является максимальной кучей!");
+                return;
+            }
+            animationQueue.clear();
+            sortQueue.clear();
+            ((MutableBinaryTree<Integer>) tree).setIsMaxHeap(false);
+
+            for (BinaryTree.TreeNode<Integer> node : BinaryTreeAlgorithms.byLevelNodes(tree.getRoot())) {
+                sortQueue.push(node);
+            }
+            timer.start();
+
         });
 
         buttonToBracketNotation.addActionListener(actionEvent -> {
@@ -259,10 +274,28 @@ public class TreeDemoFrame extends JFrame {
 
     private void makeMaxHeap() {
         BinaryTree.TreeNode<Integer> curNode = null;
+        if (!sortQueue.isEmpty() && animationQueue.isEmpty()) {
+            MutableBinaryTree<Integer>.MutableTreeNode root =
+                    ((MutableBinaryTree<Integer>.MutableTreeNode) tree.getRoot());
+            MutableBinaryTree<Integer>.MutableTreeNode last =
+                    ((MutableBinaryTree<Integer>.MutableTreeNode) sortQueue.pop());
+            if (last != root) {
+                Integer swap = last.getValue();
+                last.setValue(root.getValue());
+                root.setValue(swap);
+
+                animationQueue.push(root);
+            }
+            last.setSorted(true);
+        }
         if (lastNode != null) {
             ((MutableBinaryTree<Integer>.MutableTreeNode) lastNode).setColor(Color.BLACK);
         }
         if (animationQueue.isEmpty()) {
+            if (isMakingMaxHeap) {
+                ((MutableBinaryTree<Integer>) tree).setIsMaxHeap(true);
+                isMakingMaxHeap = false;
+            }
             timer.stop();
             repaintTree();
             return;
@@ -271,35 +304,32 @@ public class TreeDemoFrame extends JFrame {
             lastNode = curNode;
             ((MutableBinaryTree<Integer>.MutableTreeNode) curNode).setColor(Color.BLUE);
         }
-        BinaryTree.TreeNode<Integer> left = curNode.getLeft();
-        BinaryTree.TreeNode<Integer> right = curNode.getRight();
-        if (right != null || left != null) {
+        MutableBinaryTree<Integer>.MutableTreeNode left =
+                (MutableBinaryTree<Integer>.MutableTreeNode) curNode.getLeft();
+        MutableBinaryTree<Integer>.MutableTreeNode right =
+                (MutableBinaryTree<Integer>.MutableTreeNode) curNode.getRight();
+        if (right != null && !right.getSorted() || left != null && !left.getSorted()) {
 
             BinaryTree.TreeNode<Integer> largest = curNode;
             // If left child is larger than root
-            if (left != null && left.getValue() > largest.getValue())
+            if (left != null && !left.getSorted() && left.getValue() > largest.getValue())
                 largest = left;
 
             // If right child is larger than largest so far
-            if (right != null && right.getValue() > largest.getValue())
+            if (right != null && !right.getSorted() && right.getValue() > largest.getValue())
                 largest = right;
 
             // If largest is not root
             if (largest != curNode) {
                 Integer swap = curNode.getValue();
-                ((MutableBinaryTree<Integer>.MutableTreeNode) largest).setColor(Color.GRAY);
                 ((MutableBinaryTree<Integer>.MutableTreeNode) curNode).setValue(largest.getValue());
                 ((MutableBinaryTree<Integer>.MutableTreeNode) largest).setValue(swap);
 
-
-                // Recursively make max heap for the affected subtree
-                //makeMaxHeap(largest);
+                ((MutableBinaryTree<Integer>.MutableTreeNode) largest).setColor(Color.GRAY);
                 animationQueue.push(largest);
             }
         }
         repaintTree();
-        //((MutableBinaryTree<Integer>.MutableTreeNode) largest).setColor(Color.BLACK);
-        //((MutableBinaryTree<Integer>.MutableTreeNode) curNode).setColor(Color.BLACK);
     }
 
     {
