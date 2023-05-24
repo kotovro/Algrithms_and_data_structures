@@ -1,5 +1,6 @@
 package ru.vsu.cs.course1.tree;
 
+import java.awt.*;
 import java.util.function.Function;
 
 /**
@@ -11,6 +12,7 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
         public T value;
         public MutableTreeNode left;
         public MutableTreeNode right;
+        private Color color = Color.BLACK;
 
         public MutableTreeNode(T value, MutableTreeNode left, MutableTreeNode right) {
             this.value = value;
@@ -39,6 +41,13 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
         @Override
         public TreeNode<T> getRight() {
             return right;
+        }
+        @Override
+        public Color getColor() {
+            return this.color;
+        }
+        public void setColor(Color color) {
+            this.color = color;
         }
     }
 
