@@ -4,7 +4,6 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import ru.vsu.cs.course1.tree.*;
-import ru.vsu.cs.course1.tree.bst.BSTree;
 import ru.vsu.cs.course1.tree.bst.SimpleBSTreeMap;
 import ru.vsu.cs.course1.tree.bst.avl.AVLTreeMap;
 import ru.vsu.cs.course1.tree.bst.rb.RBTreeMap;
@@ -13,13 +12,10 @@ import ru.vsu.cs.util.SwingUtils;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.tree.MutableTreeNode;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.Map;
 import java.util.Stack;
-import java.util.Timer;
 
 public class TreeDemoFrame extends JFrame {
     private JPanel panelMain;
@@ -35,6 +31,8 @@ public class TreeDemoFrame extends JFrame {
     private JButton buttonSaveImage;
     private JButton buttonToBracketNotation;
     private JCheckBox checkBoxTransparent;
+    private JSlider sliderAnimationSpeed;
+    private JLabel labelAnimationSpeed;
 
     private JMenuBar menuBarMain;
     private JPanel paintPanel = null;
@@ -42,7 +40,7 @@ public class TreeDemoFrame extends JFrame {
 
     BinaryTree<Integer> tree = new MutableBinaryTree<>();
     private int animationDelay = 500;
-    private javax.swing.Timer timer = new javax.swing.Timer(animationDelay, ae -> makeMaxHeap());
+    private Timer timer = new Timer(animationDelay, ae -> makeMaxHeap());
     private Stack<BinaryTree.TreeNode<Integer>> animationQueue = new Stack<>();
     private Stack<BinaryTree.TreeNode<Integer>> sortQueue = new Stack<>();
     private BinaryTree.TreeNode<Integer> lastNode = null;
@@ -59,6 +57,7 @@ public class TreeDemoFrame extends JFrame {
         splitPaneMain.setDividerLocation(0.5);
         splitPaneMain.setResizeWeight(1.0);
         splitPaneMain.setBorder(null);
+        sliderAnimationSpeed.setValue(5);
 
         paintPanel = new JPanel() {
             private Dimension paintSize = new Dimension(0, 0);
@@ -92,6 +91,13 @@ public class TreeDemoFrame extends JFrame {
             } catch (Exception ex) {
                 SwingUtils.showErrorMessageBox(ex);
             }
+        });
+
+        sliderAnimationSpeed.addChangeListener(e -> {
+            int value = sliderAnimationSpeed.getValue();
+            timer.stop();
+            timer.setDelay(1000 / value);
+            timer.start();
         });
 
         buttonMakeMaxHeap.addActionListener(actionEvent -> {
@@ -292,25 +298,32 @@ public class TreeDemoFrame extends JFrame {
         panel1.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
         splitPaneMain.setLeftComponent(panel1);
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(3, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panel2.setLayout(new GridLayoutManager(3, 6, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
         label1.setText("Дерево в скобочной нотации:");
-        panel2.add(label1, new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(label1, new GridConstraints(0, 0, 1, 6, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         textFieldBracketNotationTree = new JTextField();
         textFieldBracketNotationTree.setText("1 (2 (3 (4), 5), 6 (, 7 (8, 9 (10 (, 12), 11))))");
-        panel2.add(textFieldBracketNotationTree, new GridConstraints(1, 0, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        panel2.add(textFieldBracketNotationTree, new GridConstraints(1, 0, 1, 6, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         buttonMakeTree = new JButton();
         buttonMakeTree.setText("Построить дерево");
         panel2.add(buttonMakeTree, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        panel2.add(spacer1, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel2.add(spacer1, new GridConstraints(2, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         buttonMakeMaxHeap = new JButton();
         buttonMakeMaxHeap.setText("Make max heap");
         panel2.add(buttonMakeMaxHeap, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         buttonSort = new JButton();
         buttonSort.setText("Sort tree");
         panel2.add(buttonSort, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        sliderAnimationSpeed = new JSlider();
+        sliderAnimationSpeed.setMaximum(10);
+        sliderAnimationSpeed.setMinimum(1);
+        panel2.add(sliderAnimationSpeed, new GridConstraints(2, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        labelAnimationSpeed = new JLabel();
+        labelAnimationSpeed.setText("Animation speed:");
+        panel2.add(labelAnimationSpeed, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         panelPaintArea = new JPanel();
         panelPaintArea.setLayout(new BorderLayout(0, 0));
         panel1.add(panelPaintArea, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
