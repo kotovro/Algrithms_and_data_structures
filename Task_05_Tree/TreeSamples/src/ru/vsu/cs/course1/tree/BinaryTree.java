@@ -15,7 +15,7 @@ import java.util.Stack;
 public interface BinaryTree<T> extends Iterable<T> {
 
     /**
-     * Интерфейс для описания узла двоичного дерева
+     * Интерфейс для описания узла двоичноbyго дерева
      *
      * @param <T>
      */
