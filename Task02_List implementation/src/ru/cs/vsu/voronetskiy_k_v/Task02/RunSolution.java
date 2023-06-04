@@ -18,13 +18,6 @@ public class RunSolution {
         SimpleLinkedList<Integer>.SimpleLinkedListNode<Integer> res = temp.getSolution(val ->
                 Integer.compare(val, 0)
         );
-//        if (outFile != null && outFile.length() != 0) {
-//            try {
-//                ArrayUtils.writeArrayToFile(outFile, res);
-//            } catch (Exception e) {
-//                return null;
-//            }
-//        }
         return res.value.intValue();
     }
 }
