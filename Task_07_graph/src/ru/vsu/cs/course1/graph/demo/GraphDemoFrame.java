@@ -384,7 +384,7 @@ public class GraphDemoFrame extends JFrame {
             int teams = Integer.parseInt(textFieldTeams.getText());
             int difTimes = Integer.parseInt(textFieldMaxDif.getText());
             boolean isKnown = checkBoxRelations.isSelected();
-            AdjMatrixGraphExt newGraph = GraphSplitter.splitter(teams, difTimes, isKnown, (AdjMatrixGraphExt) graph);
+            AdjMatrixGraphExt newGraph = GraphSplitter.splitter(teams, difTimes, isKnown, (AdjMatrixGraphExt) graph, 100000, -1);
             if (newGraph != null) {
                 try {
 

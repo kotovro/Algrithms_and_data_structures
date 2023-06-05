@@ -16,16 +16,13 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
     public AdjMatrixGraphExt() {
         super();
     }
-    private boolean[][] adjMatrix;
-    private int eCount = 0;
-    private int vCount = 0;
+
 
 
     public boolean[][] getAdjMatrix() {
         return adjMatrix;
     }
     public AdjMatrixGraphExt reduceGraph(int[] redundantNodes) {
-        AdjMatrixGraphExt res;
         List<Integer> listRedundantNodes = new LinkedList<>();
         for (int i = 0; i < redundantNodes.length; i++) {
             listRedundantNodes.add(redundantNodes[i]);
@@ -33,20 +30,24 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
         boolean[][] newMatrix = new boolean[adjMatrix.length - redundantNodes.length][adjMatrix.length - redundantNodes.length];
         int newEdges = 0;
         int newVertexes = adjMatrix.length - redundantNodes.length;
-        int newI = -1;
-        int newJ = -1;
-        for (int i = 0; i < adjMatrix.length; i++) {
+        int newI = 0;
+
+        for (int i = 0; i < adjMatrix.length-1; i++) {
             if (!listRedundantNodes.contains(i)) {
-                newI++;
-                for (int j = i; j < adjMatrix.length; j++) {
+
+                int newJ = newI + 1;
+                for (int j = i+1; j < adjMatrix.length; j++) {
                     if (!listRedundantNodes.contains(j)) {
-                        newJ++;
-                        newMatrix[newI][newJ] = adjMatrix[i][j];
-                        if (adjMatrix[i][j]) {
+
+                        newMatrix[newI][newJ] = isAdj(i, j);
+                        newMatrix[newJ][newI] = isAdj(i, j);
+                        if (isAdj(i, j)) {
                             newEdges++;
                         }
+                        newJ++;
                     }
                 }
+                newI++;
             }
         }
     return new AdjMatrixGraphExt(newMatrix, newEdges, newVertexes);
@@ -60,14 +61,16 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
         for (int i = 0; i < team.length; i++) {
             teamList.add(team[i]);
         }
-        for (int i = 0; i < adjMatrix.length; i++) {
+        for (int i = 0; i < adjMatrix.length-1; i++) {
             if (teamList.contains(i)) {
-                int newJ = 0;
-                for (int j = i; j < adjMatrix.length; j++) {
+                int newJ = teamIndex + 1;
+                for (int j = i+1; j < adjMatrix.length; j++) {
                     if (teamList.contains(j)) {
                         newMatrix[teamIndex][newJ] = isAdj(i, j);
+                        newMatrix[newJ][teamIndex] = isAdj(i, j);
                         newJ++;
-                        newEdge++;
+                        if (isAdj(i, j))
+                            newEdge++;
                     }
                 }
                 teamIndex++;
@@ -85,27 +88,30 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
         int teamIndex = 0;
         int newEdges = newGraph.edgeCount();
         int newGraphIndex = 0;
-        while (teamIndex + newGraphIndex < adjMatrix.length) {
-            if (teamList.contains(teamIndex + newGraphIndex)) {
-                for (int i = 0; i < adjMatrix.length; i++) {
-                    if (teamList.contains(i)) {
-                        newMatrix[teamIndex + newGraphIndex][i] = this.isAdj(team[teamIndex], i);
-                        newEdges++;
-                    } else {
-                        newMatrix[teamIndex + newGraphIndex][i] = false;
+        int curIndex = 0;
+        while (curIndex < adjMatrix.length - 1) {
+            if (teamList.contains(curIndex)) {
+                for (int j = curIndex + 1; j < adjMatrix.length; j++) {
+                    if (teamList.contains(j)) {
+                        newMatrix[curIndex][j] = this.isAdj(team[teamIndex], j);
+                        newMatrix[j][curIndex] = this.isAdj(team[teamIndex], j);
+                        if (isAdj(teamIndex, j)) {
+                            newEdges++;
+                        }
                     }
                 }
                 teamIndex++;
             }  else {
                 int newJ = 0;
-                for (int i = 0; i < adjMatrix.length; i++) {
-                    if (!teamList.contains(i)) {
-                        newMatrix[teamIndex + newGraphIndex][i] = newGraph.isAdj(newGraphIndex, newJ);
+                for (int j = 0; j < adjMatrix.length; j++) {
+                    if (!teamList.contains(j)) {
+                        newMatrix[curIndex][j] = newGraph.isAdj(newGraphIndex, newJ);
                         newJ++;
                     }
                 }
                 newGraphIndex++;
             }
+            curIndex = teamIndex + newGraphIndex;
         }
         return new AdjMatrixGraphExt(newMatrix, newEdges, vertexCount());
     }

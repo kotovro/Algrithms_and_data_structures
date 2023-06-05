@@ -8,9 +8,9 @@ import java.util.Iterator;
  */
 public class AdjMatrixGraph implements Graph {
 
-    private boolean[][] adjMatrix = null;
-    private int vCount = 0;
-    private int eCount = 0;
+    protected boolean[][] adjMatrix = null;
+    protected int vCount = 0;
+    protected int eCount = 0;
 
     /**
      * Конструктор
