@@ -7,6 +7,11 @@ public class GraphSplitter {
     public static AdjMatrixGraphExt splitter(int numberOfTeams, int maxDifference, boolean isNotDirectlyKnown,
                            AdjMatrixGraphExt graph, int curMinTeam, int curMaxTeam) {
         if (numberOfTeams == 1) {
+            // too big last team
+            if (graph.vertexCount() > curMinTeam * maxDifference) {
+                return null;
+            }
+
             int[] team = new int[graph.vertexCount()];
             for (int i = 0; i < graph.vertexCount(); i++) {
                 team[i] = i;
@@ -27,7 +32,7 @@ public class GraphSplitter {
         if (numberOfTeams * minAmount > graph.vertexCount()) {
             return null;
         }
-        //int effectMin = Math.min(minAmount, curMinTeam);
+
         int maxAmount = Math.min(curMinTeam * maxDifference,
                 (int) Math.floor(((double) maxDifference * graph.vertexCount()) / (numberOfTeams +
                     maxDifference - 1)));
