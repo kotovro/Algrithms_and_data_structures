@@ -41,6 +41,7 @@ public class TreeDemoFrame extends JFrame {
     private int animationDelay = 500;
     private Timer timer = new Timer(animationDelay, ae -> animate());
     private TreeSorter<Integer> treeSorter = new TreeSorter<>();
+    private java.util.Queue<MutableBinaryTree<Integer>> animationList;
     private boolean isMakingMaxHeap = false;
 
     public TreeDemoFrame() {
@@ -102,17 +103,18 @@ public class TreeDemoFrame extends JFrame {
                 SwingUtils.showInfoMessageBox("Построение максимальной кучи уже идёт!");
                 return;
             }
-            treeSorter.maxHeapQueue.clear();
-            treeSorter.sortQueue.clear();
-
-            for (BinaryTree.TreeNode<Integer> node : BinaryTreeAlgorithms.byLevelNodes(tree.getRoot())) {
-                ((MutableBinaryTree<Integer>.MutableTreeNode) node).setSorted(false);
-                treeSorter.maxHeapQueue.push((MutableBinaryTree<Integer>.MutableTreeNode) node);
+            if (tree == null || tree.getRoot() == null) {
+                SwingUtils.showInfoMessageBox("Нет дерева или оно не содержит элементов!");
+                return;
             }
 
             isMakingMaxHeap = true;
-
-            timer.start();
+            animationList = treeSorter.makeMaxHeap((MutableBinaryTree<Integer>) tree);
+            if (animationList.isEmpty()) {
+                isMakingMaxHeap = false;
+            } else {
+                timer.start();
+            }
 
         });
         buttonSort.addActionListener(actionEvent -> {
@@ -120,13 +122,8 @@ public class TreeDemoFrame extends JFrame {
                 SwingUtils.showInfoMessageBox("Текущее дерево не является максимальной кучей!");
                 return;
             }
-            treeSorter.maxHeapQueue.clear();
-            treeSorter.sortQueue.clear();
-            ((MutableBinaryTree<Integer>) tree).setIsMaxHeap(false);
+            animationList = treeSorter.sort((MutableBinaryTree<Integer>) tree);
 
-            for (BinaryTree.TreeNode<Integer> node : BinaryTreeAlgorithms.byLevelNodes(tree.getRoot())) {
-                treeSorter.sortQueue.push((MutableBinaryTree<Integer>.MutableTreeNode) node);
-            }
             timer.start();
 
         });
@@ -213,15 +210,15 @@ public class TreeDemoFrame extends JFrame {
     }
 
     private void animate() {
-        if (treeSorter.maxHeapQueue.isEmpty() && treeSorter.sortQueue.isEmpty()) {
+        if (animationList.isEmpty()) {
             if (isMakingMaxHeap) {
-                ((MutableBinaryTree<Integer>) tree).setIsMaxHeap(true);
                 isMakingMaxHeap = false;
             }
             timer.stop();
+        } else {
+            tree = animationList.remove();
+            repaintTree();
         }
-        repaintTree();
-        treeSorter.makeMaxHeap((MutableBinaryTree<Integer>) tree);
     }
 
     {

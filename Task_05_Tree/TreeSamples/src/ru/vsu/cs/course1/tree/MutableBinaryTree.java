@@ -6,9 +6,9 @@ import java.util.function.Function;
 /**
  * Реализация простейшего бинарного дерева
  */
-public class MutableBinaryTree<T> implements BinaryTree<T> {
+public class MutableBinaryTree<T> implements BinaryTree<T>, Cloneable {
 
-    public class MutableTreeNode implements BinaryTree.TreeNode<T> {
+    public class MutableTreeNode implements BinaryTree.TreeNode<T>, Cloneable {
         public T value;
         public MutableTreeNode left;
         public MutableTreeNode right;
@@ -60,6 +60,13 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
         public boolean getSorted() {
             return this.isSorted;
         }
+        //cloned node does not contain links to children nodes
+        public MutableTreeNode clone() {
+            MutableTreeNode cloned = new MutableTreeNode(value);
+            cloned.setColor(color);
+            cloned.setSorted(isSorted);
+            return cloned;
+        }
     }
 
     protected MutableTreeNode root = null;
@@ -77,7 +84,10 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
     }
 
     public MutableBinaryTree() {
-        this(null);
+        this((Function<String, T>) null);
+    }
+    public MutableBinaryTree(MutableTreeNode node) {
+        root = node;
     }
     public void setIsMaxHeap(boolean b) {
         this.isMaxHeap = b;
@@ -119,7 +129,7 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
     }
 
     private T readValue(String bracketStr, IndexWrapper iw) throws Exception {
-        // пропуcкаем возможные пробелы
+        // пропускаем возможные пробелы
         skipSpaces(bracketStr, iw);
         if (iw.index >= bracketStr.length()) {
             return null;
@@ -179,4 +189,22 @@ public class MutableBinaryTree<T> implements BinaryTree<T> {
         }
         this.root = root;
     }
+    //returns a root node of the cloned subtree
+    private MutableBinaryTree<T>.MutableTreeNode cloneSubtree(MutableBinaryTree<T>.MutableTreeNode curNode) {
+        MutableBinaryTree<T>.MutableTreeNode cloned = curNode.clone();
+        if (curNode.getLeft() != null) {
+            cloned.left = cloneSubtree((MutableTreeNode) curNode.getLeft());
+        }
+        if (curNode.getRight() != null) {
+            cloned.right = cloneSubtree((MutableTreeNode) curNode.getRight());
+        }
+       return cloned;
+    }
+    public MutableBinaryTree<T> clone() {
+        MutableBinaryTree<T> treeClone =
+                new MutableBinaryTree<>(cloneSubtree(root));
+        treeClone.setIsMaxHeap(isMaxHeap);
+        return treeClone;
+    }
+
 }
