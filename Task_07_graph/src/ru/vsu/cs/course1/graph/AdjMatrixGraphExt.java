@@ -1,13 +1,11 @@
 package ru.vsu.cs.course1.graph;
 
-import ru.vsu.cs.course1.graph.AdjMatrixGraph;
-
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 public class AdjMatrixGraphExt extends AdjMatrixGraph {
 
+    private int[] subGraphMatrix;
     public AdjMatrixGraphExt(boolean[][] adjMatrix, int edgeCount, int vertexCount) {
         this.adjMatrix = adjMatrix;
         eCount = edgeCount;
@@ -16,7 +14,6 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
     public AdjMatrixGraphExt() {
         super();
     }
-
 
 
     public boolean[][] getAdjMatrix() {
@@ -115,4 +112,188 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
         }
         return new AdjMatrixGraphExt(newMatrix, newEdges, vertexCount());
     }
+    private void  initSubgraphMatrix() {
+        subGraphMatrix = new int[vCount];
+        for (int i = 0; i < vCount; i++) {
+            subGraphMatrix[i] = 0;
+        }
+    }
+    public void setNodeTeam(int node, int team){
+        if (subGraphMatrix == null || subGraphMatrix.length == 0) {
+            initSubgraphMatrix();
+        }
+        subGraphMatrix[node] = team;
+    }
+    public int getNodeTeam(int node){
+        if (subGraphMatrix == null || subGraphMatrix.length == 0) {
+            initSubgraphMatrix();
+        }
+        return subGraphMatrix[node];
+    }
+    private String getNodeColor(int node) {
+        int index = getNodeTeam(node);
+        if (index > colors.length) {
+            index %= colors.length;
+        }
+        return colors[index];
+    }
+    public String toDot() {
+        StringBuilder sb = new StringBuilder();
+        String nl = System.getProperty("line.separator");
+        boolean isDigraph = this instanceof Digraph;
+        sb.append(isDigraph ? "digraph" : "strict graph").append(" {").append(nl);
+        for (int v1 = 0; v1 < this.vertexCount(); v1++) {
+            int count = 0;
+            for (Integer v2 : this.adjacencies(v1)) {
+                sb.append(String.format("  { %d [color=%s] } %s { %d [color=%s] }", v1, getNodeColor(v1), (isDigraph ? "->" : "--"), v2, getNodeColor(v2))).append(nl);
+                count++;
+            }
+            if (count == 0) {
+                sb.append(v1).append(nl);
+            }
+        }
+        sb.append("}").append(nl);
+
+        return sb.toString();
+    }
+    private static String[] colors = new String[] {
+            "aquamarine",
+            "bisque",
+            "blue",
+            "blueviolet",
+            "brown",
+            "burlywood",
+            "cadetblue",
+            "chartreuse",
+            "chocolate",
+            "coral",
+            "crimson",
+            "cyan",
+            "darkblue",
+            "darkcyan",
+            "darkgoldenrod",
+            "darkgray",
+            "darkgreen",
+            "darkgrey",
+            "darkkhaki",
+            "darkmagenta",
+            "darkolivegreen",
+            "darkorange",
+            "darkorchid",
+            "darkred",
+            "darksalmon",
+            "darkseagreen",
+            "darkslateblue",
+            "darkslategray",
+            "darkslategrey",
+            "darkturquoise",
+            "darkviolet",
+            "deeppink",
+            "deepskyblue",
+            "dimgray",
+            "dimgrey",
+            "dodgerblue",
+            "firebrick",
+            "floralwhite",
+            "forestgreen",
+            "fuchsia",
+            "gainsboro",
+            "ghostwhite",
+            "gold",
+            "goldenrod",
+            "gray",
+            "grey",
+            "green",
+            "greenyellow",
+            "honeydew",
+            "hotpink",
+            "indianred",
+            "indigo",
+            "ivory",
+            "khaki",
+            "lavender",
+            "lavenderblush",
+            "lawngreen",
+            "lemonchiffon",
+            "lightblue",
+            "lightcoral",
+            "lightcyan",
+            "lightgoldenrodyellow",
+            "lightgray",
+            "lightgreen",
+            "lightgrey",
+            "lightpink",
+            "lightsalmon",
+            "lightseagreen",
+            "lightskyblue",
+            "lightslategray",
+            "lightslategrey",
+            "lightsteelblue",
+            "lightyellow",
+            "lime",
+            "limegreen",
+            "linen",
+            "magenta",
+            "maroon",
+            "mediumaquamarine",
+            "mediumblue",
+            "mediumorchid",
+            "mediumpurple",
+            "mediumseagreen",
+            "mediumslateblue",
+            "mediumspringgreen",
+            "mediumturquoise",
+            "mediumvioletred",
+            "midnightblue",
+            "mintcream",
+            "mistyrose",
+            "moccasin",
+            "navajowhite",
+            "navy",
+            "oldlace",
+            "olive",
+            "olivedrab",
+            "orange",
+            "orangered",
+            "orchid",
+            "palegoldenrod",
+            "palegreen",
+            "paleturquoise",
+            "palevioletred",
+            "papayawhip",
+            "peachpuff",
+            "peru",
+            "pink",
+            "plum",
+            "powderblue",
+            "purple",
+            "red",
+            "rosybrown",
+            "royalblue",
+            "saddlebrown",
+            "salmon",
+            "sandybrown",
+            "seagreen",
+            "seashell",
+            "sienna",
+            "silver",
+            "skyblue",
+            "slateblue",
+            "slategray",
+            "slategrey",
+            "snow",
+            "springgreen",
+            "steelblue",
+            "tan",
+            "teal",
+            "thistle",
+            "tomato",
+            "turquoise",
+            "violet",
+            "wheat",
+            "white",
+            "whitesmoke",
+            "yellow",
+            "yellowgreen"
+    };
 }

@@ -294,7 +294,7 @@ public class GraphDemoFrame extends JFrame {
             if (newGraph != null) {
                 try {
 
-                    panelGraphPainter.paint(dotToSvg(GraphUtils.toDot(newGraph)));
+                    panelGraphPainter.paint(dotToSvg(newGraph.toDot()));
                 } catch (Exception ex) {
                 }
             } else {
