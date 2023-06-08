@@ -45,6 +45,11 @@ public class GraphSplitter {
 
         int[] allFreeVertexes = graph.getFreeVertexes();
 
+        // check if current vertex, which is now a root, has any free adjacent vertexes
+        if (!graph.adjacenciesInSubgraph(0, 0).iterator().hasNext()) {
+            return false;
+        }
+
         for (int num = minAmount; num <= maxAmount; num++) {
             if (!checkTeamSize(graph.getFreeVertexesCount(), num, desiredNumberOfSubgraphs - 1, maxAmount)) {
                 continue;
