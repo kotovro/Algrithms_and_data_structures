@@ -1,66 +1,103 @@
 package ru.vsu.cs.course1.graph;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class GraphSplitter {
-    public static AdjMatrixGraphExt splitter(int numberOfTeams, int maxDifference, boolean isNotDirectlyKnown,
-                           AdjMatrixGraphExt graph, int curMinTeam, int curMaxTeam) {
-        if (numberOfTeams == 1) {
-            // too big last team
-            if (graph.vertexCount() > curMinTeam * maxDifference) {
-                return null;
+    public static boolean splitter(int desiredNumberOfSubgraphs, int maxDifference, boolean isNotDirectlyKnown,
+                           AdjMatrixGraphExt graph, int curMinTeam, int curMaxTeam, boolean isInit) {
+        if (isInit) {
+            graph.initSubgraphMatrix();
+        }
+        if (desiredNumberOfSubgraphs == 1) {
+            // too big last team (possible, it's a redundant check)
+            if (curMinTeam != 10000 && graph.getFreeVertexesCount() > curMinTeam * maxDifference) {
+                return false;
             }
 
-            int[] team = new int[graph.vertexCount()];
-            for (int i = 0; i < graph.vertexCount(); i++) {
-                team[i] = i;
-            }
-            if (checkTeam(graph, team, isNotDirectlyKnown)) {
-                return graph;
+            int[] notInTeams = graph.getFreeVertexes();
+
+            if (isSubgraphValid(graph, notInTeams, 0, isNotDirectlyKnown)) {
+                return true;
             } else {
-                return null;
+                return false;
             }
         }
-        int minAmount = (int) Math.ceil(((double)graph.vertexCount()) / (maxDifference * (numberOfTeams - 1) + 1));
+        // because of the (N - x) / (M - 1) <= Kx, where x is minimum possible subgraph
+        int minAmount = (int) Math.ceil(((double)graph.getFreeVertexesCount()) / (maxDifference * (desiredNumberOfSubgraphs - 1) + 1));
 
         if (minAmount < 2) {
             minAmount = 2;
         }
+
         minAmount = Math.max(minAmount, (int) Math.ceil(((double) curMaxTeam) / maxDifference));
 
-        if (numberOfTeams * minAmount > graph.vertexCount()) {
-            return null;
+        if (desiredNumberOfSubgraphs * minAmount > graph.getFreeVertexesCount()) {
+            return false;
         }
 
         int maxAmount = Math.min(curMinTeam * maxDifference,
-                (int) Math.floor(((double) maxDifference * graph.vertexCount()) / (numberOfTeams +
+                //(N - x) / (M - 1) = x/K, where x is the largest team possible
+                (int) Math.floor(((double) maxDifference * graph.getFreeVertexesCount()) / (desiredNumberOfSubgraphs +
                     maxDifference - 1)));
 
+        int[] allFreeVertexes = graph.getFreeVertexes();
+
         for (int num = minAmount; num <= maxAmount; num++) {
-            int[] nodes = new int[num - 1];
-            int code = gen_comb_norep_lex_init(nodes, graph.vertexCount()  - 1, num - 1);
-            while(code > 0) {
-                int[] team = reconstructNodes(nodes);
-                if (checkTeam(graph, team, isNotDirectlyKnown)) {
-                    AdjMatrixGraphExt newGraph = splitter(
-                            numberOfTeams - 1,
+            if (!checkTeamSize(graph.getFreeVertexesCount(), num, desiredNumberOfSubgraphs - 1, maxAmount)) {
+                continue;
+            }
+            int[] estimatedSubgraphAddIndexes = new int[num - 1];
+            int code = gen_comb_norep_lex_init(estimatedSubgraphAddIndexes, allFreeVertexes.length  - 1, num - 1);
+
+            while (code > 0) {
+                int[] estimatedSubgraph = getEstimatedSubgraph(allFreeVertexes, estimatedSubgraphAddIndexes, num);
+                int subgraphNumber = graph.getSubgraphsCount() + 1;
+                assignSubgraphNumber(graph, estimatedSubgraph, subgraphNumber);
+
+                if (isSubgraphValid(graph, estimatedSubgraph, subgraphNumber, isNotDirectlyKnown)) {
+
+                    if (splitter(
+                            desiredNumberOfSubgraphs - 1,
                             maxDifference,
                             isNotDirectlyKnown,
-                            graph.reduceGraph(team),
+                            graph,
                             Math.min(curMinTeam,
-                                team.length),
-                            Math.max(curMaxTeam, team.length));
-                    if (newGraph != null) {
-                        return graph.merge(newGraph, team);
+                                estimatedSubgraph.length),
+                            Math.max(curMaxTeam, estimatedSubgraph.length),
+                            false)) {
+
+                        return true;
                     }
                 }
-                code = gen_comb_norep_lex_next(nodes, graph.vertexCount() - 1, num - 1);
+                assignSubgraphNumber(graph, estimatedSubgraph, 0);
+                code = gen_comb_norep_lex_next(estimatedSubgraphAddIndexes, allFreeVertexes.length - 1, num - 1);
             }
         }
-        return null;
+        return false;
     }
+    private static void assignSubgraphNumber(AdjMatrixGraphExt graph, int[] subgraph, int number) {
+        for (int i = 0; i < subgraph.length; i++) {
+            graph.setVertexSubgraph(subgraph[i], number);
+        }
+    }
+    /**
+    *  Will try to construct estimated subgraph
+    * only with the first free vertex because
+    * all others will be the same.
+    * So, it will be a first free vertex + estimatedSubgraphAdd
+     */
+    private static int[] getEstimatedSubgraph(int[] freeVertexes, int[] add, int length) {
+        int[] res = new int[length];
+        res[0] = freeVertexes[0];
+        for (int i = 0; i < add.length; i++) {
+            res[i + 1] = freeVertexes[add[i] + 1];
+        }
 
+        return res;
+    }
     private static int[] reconstructNodes(int[] nodes) {
         int[] res = new int[nodes.length + 1];
         res[0] = 0;
@@ -69,11 +106,15 @@ public class GraphSplitter {
         }
         return res;
     }
-    private static boolean checkTeam(AdjMatrixGraphExt graph, int[] nodes, boolean isNotDirectlyKnown) {
-        if(!isNotDirectlyKnown) {
-            for (int i = 0; i < nodes.length - 1; i++) {
-                for (int j = i + 1; j < nodes.length; j++) {
-                    if (!graph.isAdj(nodes[i], nodes[j])) {
+    private static boolean checkTeamSize(int freeCount, int teamSize, int teamsCount, int maxSize) {
+        double avgRestTeamsMembers = ((double)freeCount - teamSize) / teamsCount;
+        return (avgRestTeamsMembers >= 2) && (avgRestTeamsMembers <= maxSize);
+    }
+    private static boolean isSubgraphValid(AdjMatrixGraphExt graph, int[] subgraph, int subgraphNumber,  boolean isNotDirectlyKnown) {
+        if (!isNotDirectlyKnown) {
+            for (int i = 0; i < subgraph.length - 1; i++) {
+                for (int j = i + 1; j < subgraph.length; j++) {
+                    if (!graph.isAdj(subgraph[i], subgraph[j])) {
                         return false;
                     }
                 }
@@ -81,11 +122,11 @@ public class GraphSplitter {
             return true;
         } else {
             List<Integer> teamGraphList = new LinkedList<>();
-            for (Integer node: GraphAlgorithms.bfs(graph.makeTeamGraph(nodes), 0)) {
+            for (Integer node: bfsInSubgraph(graph, subgraph, subgraphNumber, 0)) {
                teamGraphList.add(node);
             }
-            for (int i = 0; i < nodes.length; i++) {
-                if (!teamGraphList.contains(i)) {
+            for (int i = 0; i < subgraph.length; i++) {
+                if (!teamGraphList.contains(subgraph[i])) {
                     return false;
                 }
             }
@@ -143,6 +184,39 @@ public class GraphSplitter {
         }
 
         return 1;
+    }
+    public static Iterable<Integer> bfsInSubgraph(AdjMatrixGraphExt graph, int[] subgraph, int subgraphNumber, int from) {
+        return new Iterable<Integer>() {
+            private Queue<Integer> queue = null;
+            private boolean[] visited = null;
+
+            @Override
+            public Iterator<Integer> iterator() {
+                queue = new LinkedList<>();
+                queue.add(from);
+                visited = new boolean[graph.getSubgraphVertexCount(subgraphNumber)];
+                visited[from] = true;
+
+                return new Iterator<Integer>() {
+                    @Override
+                    public boolean hasNext() {
+                        return ! queue.isEmpty();
+                    }
+
+                    @Override
+                    public Integer next() {
+                        Integer result = queue.remove();
+                        for (Integer adj : graph.adjacenciesInSubgraph(result, subgraphNumber)) {
+                            if (!visited[adj]) {
+                                visited[adj] = true;
+                                queue.add(adj);
+                            }
+                        }
+                        return subgraph[result];
+                    }
+                };
+            }
+        };
     }
 }
 // наполнять массив данными о смежных

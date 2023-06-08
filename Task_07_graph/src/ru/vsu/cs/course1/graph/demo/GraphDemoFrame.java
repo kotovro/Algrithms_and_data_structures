@@ -205,7 +205,8 @@ public class GraphDemoFrame extends JFrame {
                 Class clz = Class.forName("ru.vsu.cs.course1.graph." + className);
                 Graph graph = GraphUtils.fromStr(textAreaGraphFile.getText(), clz);
                 GraphDemoFrame.this.graph = graph;
-                panelGraphPainter.paint(dotToSvg(GraphUtils.toDot(graph)));
+                //panelGraphPainter.paint(dotToSvg(GraphUtils.toDot(graph)));
+                panelGraphPainter.paint(dotToSvg(((AdjMatrixGraphExt) graph).toDot()));
             } catch (Exception exc) {
                 SwingUtils.showErrorMessageBox(exc);
             }
@@ -290,11 +291,9 @@ public class GraphDemoFrame extends JFrame {
             int teams = Integer.parseInt(textFieldTeams.getText());
             int difTimes = Integer.parseInt(textFieldMaxDif.getText());
             boolean isKnown = checkBoxRelations.isSelected();
-            AdjMatrixGraphExt newGraph = GraphSplitter.splitter(teams, difTimes, isKnown, (AdjMatrixGraphExt) graph, 100000, -1);
-            if (newGraph != null) {
+            if (GraphSplitter.splitter(teams, difTimes, isKnown, (AdjMatrixGraphExt) graph, 10000, -1, true)) {
                 try {
-
-                    panelGraphPainter.paint(dotToSvg(newGraph.toDot()));
+                    panelGraphPainter.paint(dotToSvg(((AdjMatrixGraphExt) graph).toDot()));
                 } catch (Exception ex) {
                 }
             } else {
