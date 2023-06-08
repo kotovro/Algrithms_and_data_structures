@@ -1,22 +1,26 @@
 package ru.vsu.cs.course1.tree.demo;
 
 import ru.vsu.cs.course1.tree.BinaryTree;
+import ru.vsu.cs.course1.tree.BinaryTreeAlgorithms;
 import ru.vsu.cs.course1.tree.MutableBinaryTree;
+import ru.vsu.cs.util.SwingUtils;
 
 import java.awt.*;
-import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.Stack;
 
 public class  TreeSorter<T extends Comparable<T>>  {
     private MutableBinaryTree<T>.MutableTreeNode lastNode = null;
-    public Stack<MutableBinaryTree<T>.MutableTreeNode> maxHeapQueue;
-    public Stack<MutableBinaryTree<T>.MutableTreeNode> sortQueue;
+    private Stack<MutableBinaryTree<T>.MutableTreeNode> maxHeapQueue;
+    private Stack<MutableBinaryTree<T>.MutableTreeNode> sortQueue;
 
     public TreeSorter() {
         maxHeapQueue = new Stack<>();
         sortQueue = new Stack<>();
     }
-    public void makeMaxHeap(MutableBinaryTree<T> tree) {
+    public void getAnimationFrame(MutableBinaryTree<T> tree) {
         MutableBinaryTree<T>.MutableTreeNode curNode = null;
         if (!sortQueue.isEmpty() && maxHeapQueue.isEmpty()) {
             MutableBinaryTree<T>.MutableTreeNode root =
@@ -35,12 +39,6 @@ public class  TreeSorter<T extends Comparable<T>>  {
              lastNode.setColor(Color.BLACK);
         }
         if (maxHeapQueue.isEmpty()) {
-//            if (isMakingMaxHeap) {
-//                tree.setIsMaxHeap(true);
-//                isMakingMaxHeap = false;
-//            }
-//            timer.stop();
-//            repaintTree();
             return;
         } else {
             curNode = maxHeapQueue.pop();
@@ -72,5 +70,46 @@ public class  TreeSorter<T extends Comparable<T>>  {
                 maxHeapQueue.push(largest);
             }
         }
+    }
+
+
+// идея следующая: будем формировать список из деревьев, которые будем передавать в графику
+//
+    public Queue<MutableBinaryTree<T>> sort(MutableBinaryTree<T> tree) {
+        Queue<MutableBinaryTree<T>> result = new LinkedList<>();
+        maxHeapQueue.clear();
+        sortQueue.clear();
+        tree.setIsMaxHeap(false);
+
+        for (BinaryTree.TreeNode<T> node : BinaryTreeAlgorithms.byLevelNodes(tree.getRoot())) {
+            sortQueue.push((MutableBinaryTree<T>.MutableTreeNode) node);
+        }
+
+        while (!maxHeapQueue.isEmpty() || !sortQueue.isEmpty()) {
+            getAnimationFrame(tree);
+            result.add(tree.clone());
+        }
+        return result;
+    }
+    public Queue<MutableBinaryTree<T>> makeMaxHeap(MutableBinaryTree<T> tree) {
+        Queue<MutableBinaryTree<T>> result = new LinkedList<>();
+        maxHeapQueue.clear();
+        sortQueue.clear();
+        tree.setIsMaxHeap(false);
+
+        for (BinaryTree.TreeNode<T> node : BinaryTreeAlgorithms.byLevelNodes(tree.getRoot())) {
+            ((MutableBinaryTree<Integer>.MutableTreeNode) node).setSorted(false);
+            maxHeapQueue.push((MutableBinaryTree<T>.MutableTreeNode) node);
+        }
+        while (!maxHeapQueue.isEmpty()) {
+            getAnimationFrame(tree);
+            result.add(tree.clone());
+        }
+        getAnimationFrame(tree);
+        MutableBinaryTree<T> finall = tree.clone();
+        finall.setIsMaxHeap(true);
+        result.add(finall);
+
+        return result;
     }
 }
