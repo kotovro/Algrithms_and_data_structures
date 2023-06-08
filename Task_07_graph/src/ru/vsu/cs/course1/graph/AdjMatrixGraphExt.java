@@ -7,7 +7,6 @@ import java.util.Iterator;
     Graph, that can be separated into sub-graphs
 */
 public class AdjMatrixGraphExt extends AdjMatrixGraph {
-
     private int[] subgraphMatrix;
     public AdjMatrixGraphExt(boolean[][] adjMatrix, int edgeCount, int vertexCount) {
         this.adjMatrix = adjMatrix;
@@ -124,6 +123,20 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
         }
         return subgraphMatrix[vertex];
     }
+    final String lineBreak = System.getProperty("line.separator");
+    public String toStr() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(vCount).append(lineBreak);
+        sb.append(eCount).append(lineBreak);
+        for (int i = 0; i < vCount - 1; i++) {
+            for (int j = i + 1; j < vCount; j++) {
+                if(adjMatrix[i][j]) {
+                    sb.append(String.format("%d %d", i, j)).append(lineBreak);
+                }
+            }
+        }
+        return sb.toString();
+    }
 
     /**
      * All of this stuff to the rest of the class used for graphviz dot notation
@@ -138,20 +151,19 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
     }
     public String toDot() {
         StringBuilder sb = new StringBuilder();
-        String nl = System.getProperty("line.separator");
         boolean isDigraph = this instanceof Digraph;
-        sb.append(isDigraph ? "digraph" : "strict graph").append(" {").append(nl);
+        sb.append(isDigraph ? "digraph" : "strict graph").append(" {").append(lineBreak);
         for (int v1 = 0; v1 < this.vertexCount(); v1++) {
             int count = 0;
             for (Integer v2 : this.adjacencies(v1)) {
-                sb.append(String.format("  { %d [color=%s] } %s { %d [color=%s] }", v1, getVertexColor(v1), (isDigraph ? "->" : "--"), v2, getVertexColor(v2))).append(nl);
+                sb.append(String.format("  { %d [color=%s] } %s { %d [color=%s] }", v1, getVertexColor(v1), (isDigraph ? "->" : "--"), v2, getVertexColor(v2))).append(lineBreak);
                 count++;
             }
             if (count == 0) {
-                sb.append(v1).append(nl);
+                sb.append(v1).append(lineBreak);
             }
         }
-        sb.append("}").append(nl);
+        sb.append("}").append(lineBreak);
 
         return sb.toString();
     }
