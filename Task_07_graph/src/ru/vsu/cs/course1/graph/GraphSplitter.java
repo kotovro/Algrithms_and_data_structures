@@ -20,6 +20,7 @@ public class GraphSplitter {
             int[] notInTeams = graph.getFreeVertexes();
 
             if (isSubgraphValid(graph, notInTeams, 0, isNotDirectlyKnown)) {
+                assignSubgraphNumber(graph, notInTeams, graph.getSubgraphsCount() + 1);
                 return true;
             } else {
                 return false;

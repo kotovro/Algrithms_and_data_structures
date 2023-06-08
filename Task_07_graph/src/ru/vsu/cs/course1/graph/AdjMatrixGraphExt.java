@@ -156,7 +156,11 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
         for (int v1 = 0; v1 < this.vertexCount(); v1++) {
             int count = 0;
             for (Integer v2 : this.adjacencies(v1)) {
-                sb.append(String.format("  { %d [color=%s] } %s { %d [color=%s] }", v1, getVertexColor(v1), (isDigraph ? "->" : "--"), v2, getVertexColor(v2))).append(lineBreak);
+                String style1 = (getVertexSubgraph(v1) != 0) ? "style=filled" : "";
+                String style2 = (getVertexSubgraph(v2) != 0) ? "style=filled" : "";
+                sb.append(String.format("  { %d [color=%s %s] } %s { %d [color=%s %s] }",
+                        v1, getVertexColor(v1), style1, (isDigraph ? "->" : "--"), v2, getVertexColor(v2), style2))
+                        .append(lineBreak);
                 count++;
             }
             if (count == 0) {
@@ -171,18 +175,18 @@ public class AdjMatrixGraphExt extends AdjMatrixGraph {
             "black",
             "aquamarine",
             "bisque",
-            "blue",
-            "blueviolet",
+            //"blue",
+            //"blueviolet",
             "brown",
             "burlywood",
             "cadetblue",
             "chartreuse",
-            "chocolate",
+            //"chocolate",
             "coral",
             "crimson",
             "cyan",
-            "darkblue",
-            "darkcyan",
+            //"darkblue",
+            //"darkcyan",
             "darkgoldenrod",
             "darkgray",
             "darkgreen",
