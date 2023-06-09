@@ -42,7 +42,6 @@ public class TreeDemoFrame extends JFrame {
     private Timer timer = new Timer(animationDelay, ae -> animate());
     private TreeSorter<Integer> treeSorter = new TreeSorter<>();
     private java.util.Queue<MutableBinaryTree<Integer>> animationList;
-    private boolean isMakingMaxHeap = false;
 
     public TreeDemoFrame() {
         this.setTitle("Двоичные деревья");
@@ -93,14 +92,21 @@ public class TreeDemoFrame extends JFrame {
 
         sliderAnimationSpeed.addChangeListener(e -> {
             int value = sliderAnimationSpeed.getValue();
-            timer.stop();
+            boolean needStartTimer = false;
+            if (timer.isRunning()) {
+                needStartTimer = true;
+                timer.stop();
+            }
             timer.setDelay(1000 / value);
-            timer.start();
+            if (needStartTimer) {
+                timer.start();
+            }
+
         });
 
         buttonMakeMaxHeap.addActionListener(actionEvent -> {
-            if (isMakingMaxHeap) {
-                SwingUtils.showInfoMessageBox("Построение максимальной кучи уже идёт!");
+            if (timer.isRunning()) {
+                SwingUtils.showInfoMessageBox("Анимация уже идёт, дождитесь окончания!");
                 return;
             }
             if (tree == null || tree.getRoot() == null) {
@@ -108,16 +114,17 @@ public class TreeDemoFrame extends JFrame {
                 return;
             }
 
-            isMakingMaxHeap = true;
             animationList = treeSorter.makeMaxHeap((MutableBinaryTree<Integer>) tree);
-            if (animationList.isEmpty()) {
-                isMakingMaxHeap = false;
-            } else {
+            if (!animationList.isEmpty()) {
                 timer.start();
             }
 
         });
         buttonSort.addActionListener(actionEvent -> {
+            if (timer.isRunning()) {
+                SwingUtils.showInfoMessageBox("Анимация уже идёт, дождитесь окончания!");
+                return;
+            }
             if (!((MutableBinaryTree<Integer>) tree).getIsMaxHeap()) {
                 SwingUtils.showInfoMessageBox("Текущее дерево не является максимальной кучей!");
                 return;
@@ -211,9 +218,6 @@ public class TreeDemoFrame extends JFrame {
 
     private void animate() {
         if (animationList.isEmpty()) {
-            if (isMakingMaxHeap) {
-                isMakingMaxHeap = false;
-            }
             timer.stop();
         } else {
             tree = animationList.remove();
