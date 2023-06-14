@@ -210,6 +210,7 @@ public class GraphDemoFrame extends JFrame {
                 String className = matcher.group(1);
                 Class clz = Class.forName("ru.vsu.cs.course1.graph." + className);
                 Graph graph = GraphUtils.fromStr(textAreaGraphFile.getText(), clz);
+                System.out.println(textAreaGraphFile.getText());
                 GraphDemoFrame.this.graph = graph;
                 //panelGraphPainter.paint(dotToSvg(GraphUtils.toDot(graph)));
                 panelGraphPainter.paint(dotToSvg(((AdjMatrixGraphExt) graph).toDot()));

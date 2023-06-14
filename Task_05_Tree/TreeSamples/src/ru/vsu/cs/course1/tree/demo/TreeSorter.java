@@ -20,7 +20,7 @@ public class  TreeSorter<T extends Comparable<T>>  {
         maxHeapQueue = new Stack<>();
         sortQueue = new Stack<>();
     }
-    public void getAnimationFrame(MutableBinaryTree<T> tree) {
+    private void getAnimationFrame(MutableBinaryTree<T> tree) {
         MutableBinaryTree<T>.MutableTreeNode curNode = null;
         if (!sortQueue.isEmpty() && maxHeapQueue.isEmpty()) {
             MutableBinaryTree<T>.MutableTreeNode root =
