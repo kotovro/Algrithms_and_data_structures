@@ -156,11 +156,11 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
         BinaryTree.TreeNode<T> ceilingNode = getCeilingNode(value);
         return (ceilingNode == null) ? null : ceilingNode.getValue();
     }
-    default Iterable<TreeNode<T>> iterateFromTo(T valueFrom, T valueTo) {
+    default Iterable<T> iterateFromTo(T valueFrom, T valueTo) {
         if (valueTo.compareTo(valueFrom) < 0) {
             throw new IllegalArgumentException("The end value has to be greater than initial one!");
         }
-        return new Iterable<TreeNode<T>>() {
+        return new Iterable<T>() {
             private Stack<TreeNode<T>> stack = null;
             private TreeNode<T> findFirstNode(TreeNode<T> node) {
                 if (node == null) {
@@ -188,12 +188,12 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
                 }
             }
             @Override
-            public Iterator<TreeNode<T>> iterator() {
+            public Iterator<T> iterator() {
                 stack = new Stack<>();
                 TreeNode<T> first = findFirstNode(getRoot());
 
 
-                return new Iterator<TreeNode<T>>() {
+                return new Iterator<T>() {
                     private TreeNode<T> next = first;
                     @Override
                     public boolean hasNext() {
@@ -201,7 +201,7 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
                     }
 
                     @Override
-                    public TreeNode<T> next() {
+                    public T next() {
                         TreeNode<T> tmp = findFirstNode(next.getRight());
                         if (tmp != null) {
                             stack.push(tmp);
@@ -212,7 +212,7 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
                         } else {
                             next = stack.pop();
                         }
-                        return result;
+                        return result.getValue();
                     }
                 };
             }

@@ -1,12 +1,13 @@
 package ru.vsu.cs.course1.tree.bst;
 
+import ru.vsu.cs.util.dummy.DefaultNotSupportedCollection;
+import ru.vsu.cs.util.dummy.DefaultNotSupportedSet;
+import ru.vsu.cs.util.dummy.DefaultNotSupportedSortedMap;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import ru.vsu.cs.util.dummy.DefaultNotSupportedCollection;
-import ru.vsu.cs.util.dummy.DefaultNotSupportedSet;
-import ru.vsu.cs.util.dummy.DefaultNotSupportedSortedMap;
 
 /**
  * Интерфейс словаря на базе двоичного дерева поиска (BinarySearchTree) с
@@ -187,5 +188,12 @@ public interface BSTreeMap<K extends Comparable<? super K>, V> extends DefaultNo
 
             // надо будет потом реализовать остальные методы
         };
+    }
+    default Iterable<MapTreeEntry<K, V>> iterateFromTo (K keyFrom, K keyTo) {
+        MapTreeEntry<K, V> kvPairFrom = new MapTreeEntry<>(keyFrom, null);
+        MapTreeEntry<K, V> kvPairTo = new MapTreeEntry<>(keyTo, null);
+
+        return  getTree().iterateFromTo(kvPairFrom, kvPairTo);
+
     }
 }

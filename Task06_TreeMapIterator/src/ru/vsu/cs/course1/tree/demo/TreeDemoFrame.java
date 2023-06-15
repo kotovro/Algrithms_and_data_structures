@@ -259,8 +259,8 @@ public class TreeDemoFrame extends JFrame {
         buttonByLevelTraverse.addActionListener(actionEvent -> {
             showSystemOut(() -> {
                 System.out.println("Итератор:");
-                for (BinaryTree.TreeNode<Integer> node : ((BSTree<Integer>) tree).iterateFromTo(15, 55)) {
-                    System.out.println(node.getValue());
+                for (Integer node : ((BSTree<Integer>) tree).iterateFromTo(15, 55)) {
+                    System.out.println(node);
                 }
             });
         });
