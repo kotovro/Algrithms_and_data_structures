@@ -3,7 +3,6 @@ package ru.vsu.cs.course1.tree.demo;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import ru.vsu.cs.course1.tree.BinaryTreeAlgorithms;
 import ru.vsu.cs.course1.tree.SimpleBinaryTree;
 import ru.vsu.cs.course1.tree.BinaryTreePainter;
 import ru.vsu.cs.course1.tree.BinaryTree;
@@ -11,9 +10,7 @@ import ru.vsu.cs.course1.tree.bst.BSTree;
 import ru.vsu.cs.course1.tree.bst.BSTreeMap;
 import ru.vsu.cs.course1.tree.bst.SimpleBSTree;
 import ru.vsu.cs.course1.tree.bst.SimpleBSTreeMap;
-import ru.vsu.cs.course1.tree.bst.avl.AVLTree;
 import ru.vsu.cs.course1.tree.bst.avl.AVLTreeMap;
-import ru.vsu.cs.course1.tree.bst.rb.RBTree;
 import ru.vsu.cs.course1.tree.bst.rb.RBTreeMap;
 import ru.vsu.cs.util.ArrayUtils;
 import ru.vsu.cs.util.DemoUtils;
@@ -43,6 +40,8 @@ public class TreeDemoFrame extends JFrame {
     private JButton buttonSaveImage;
     private JCheckBox checkBoxTransparent;
     private JSpinner spinnerSingleValue;
+    private JTextField textFieldFrom;
+    private JTextField textFieldTo;
 
     private JMenuBar menuBarMain;
     private JPanel paintPanel = null;
@@ -159,8 +158,10 @@ public class TreeDemoFrame extends JFrame {
         buttonGetIterator.addActionListener(actionEvent -> {
             showSystemOut(() -> {
                 System.out.println("Итератор:");
-                BSTreeMap.MapTreeEntry<Integer, String> from = new BSTreeMap.MapTreeEntry<>(15, null);
-                BSTreeMap.MapTreeEntry<Integer, String> to = new BSTreeMap.MapTreeEntry<>(55, null);
+                int keyFrom = Integer.parseInt(textFieldFrom.getText());
+                int keyTo = Integer.parseInt(textFieldTo.getText());
+                BSTreeMap.MapTreeEntry<Integer, String> from = new BSTreeMap.MapTreeEntry<>(keyFrom, null);
+                BSTreeMap.MapTreeEntry<Integer, String> to = new BSTreeMap.MapTreeEntry<>(keyTo, null);
                 for (BSTreeMap.MapTreeEntry<Integer, String> node : ((BSTree<BSTreeMap.MapTreeEntry<Integer, String>>) tree)
                         .iterateFromTo(from, to)) {
                     System.out.println(node.toString());
@@ -265,7 +266,7 @@ public class TreeDemoFrame extends JFrame {
         panel2.setLayout(new GridLayoutManager(4, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         textFieldValues = new JTextField();
-        textFieldValues.setText("6, 8, 3, 5, 7, 2, 16, 1, 15, 12, 9");
+        textFieldValues.setText("86=qo,79=md,30=uv,43=vc,5=ah,30=of,28=lo,13=ch,9=fo,59=ey,51=gl,2=oo,47=dr,29=ir,28=wb");
         panel2.add(textFieldValues, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), -1, -1));
@@ -284,18 +285,16 @@ public class TreeDemoFrame extends JFrame {
         label1.setText("cлучайных пар");
         panel3.add(label1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel4 = new JPanel();
-        panel4.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel4.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel4, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonMakeBSTree2 = new JButton();
         buttonMakeBSTree2.setText("Построить дерево поиска");
         panel4.add(buttonMakeBSTree2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        panel4.add(spacer2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel2.add(panel5, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        panel5.add(spacer3, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer2 = new Spacer();
+        panel5.add(spacer2, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         buttonAddValue = new JButton();
         buttonAddValue.setText("Добавить");
         panel5.add(buttonAddValue, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -307,29 +306,41 @@ public class TreeDemoFrame extends JFrame {
         panelPaintArea = new JPanel();
         panelPaintArea.setLayout(new BorderLayout(0, 0));
         panel1.add(panelPaintArea, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer4 = new Spacer();
-        panelPaintArea.add(spacer4, BorderLayout.CENTER);
+        final Spacer spacer3 = new Spacer();
+        panelPaintArea.add(spacer3, BorderLayout.CENTER);
         final JPanel panel6 = new JPanel();
         panel6.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonSaveImage = new JButton();
         buttonSaveImage.setText("Сохранить изображение в SVG");
         panel6.add(buttonSaveImage, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer5 = new Spacer();
-        panel6.add(spacer5, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer4 = new Spacer();
+        panel6.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         checkBoxTransparent = new JCheckBox();
         checkBoxTransparent.setText("прозрачность");
         panel6.add(checkBoxTransparent, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel7 = new JPanel();
-        panel7.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel7.setLayout(new GridLayoutManager(2, 8, new Insets(0, 0, 0, 0), -1, -1));
         splitPaneMain.setRightComponent(panel7);
         buttonGetIterator = new JButton();
         buttonGetIterator.setText("Итерировать");
         panel7.add(buttonGetIterator, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
-        panel7.add(scrollPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel7.add(scrollPane1, new GridConstraints(1, 0, 1, 8, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         textAreaSystemOut = new JTextArea();
         scrollPane1.setViewportView(textAreaSystemOut);
+        final JLabel label2 = new JLabel();
+        label2.setText("От:");
+        panel7.add(label2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        textFieldFrom = new JTextField();
+        textFieldFrom.setText("15");
+        panel7.add(textFieldFrom, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("До:");
+        panel7.add(label3, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        textFieldTo = new JTextField();
+        textFieldTo.setText("55");
+        panel7.add(textFieldTo, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
     }
 
     /**
