@@ -168,9 +168,6 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
                 }
                 int cmp = valueFrom.compareTo(node.getValue());
                 if (cmp == 0) {
-                    if (node.getRight() != null && node.getRight().getValue().compareTo(valueTo) < 1) {
-                        stack.push(node.getRight());
-                    }
                     return node;
                 } else if (cmp > 0) {
                     return findFirstNode(node.getRight());
@@ -183,9 +180,6 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
                         return res;
                     } else {
                         if (node.getValue().compareTo(valueTo) < 1) {
-                            if (node.getRight() != null && node.getRight().getValue().compareTo(valueTo) < 1) {
-                                stack.push(node.getRight());
-                            }
                             return node;
                         } else {
                             return null;
@@ -208,17 +202,15 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
 
                     @Override
                     public TreeNode<T> next() {
+                        TreeNode<T> tmp = findFirstNode(next.getRight());
+                        if (tmp != null) {
+                            stack.push(tmp);
+                        }
                         TreeNode<T> result = next;
                         if (stack.isEmpty()) {
                             next = null;
                         } else {
                             next = stack.pop();
-                            if (stack.peek() != next.getRight()) {
-                                TreeNode<T> tmp = findFirstNode(next.getRight());
-                                if (tmp != null) {
-                                    stack.push(tmp);
-                                }
-                            }
                         }
                         return result;
                     }
