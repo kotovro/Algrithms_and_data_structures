@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.MouseInputAdapter;
 
 
 public class Test extends JFrame {
@@ -21,6 +22,7 @@ public class Test extends JFrame {
     private int nodeRadius = 15;
 
     private int selectedNodeIndex = -1;
+    private int draggingNodeIndex = -1;
     private Point2D[] nodePositions = new Point2D[numberOfNodes];
     //private Nodes ;
     private static final long serialVersionUID = 1L;
@@ -72,33 +74,66 @@ public class Test extends JFrame {
         generateNodesCircle(areaCenter, radius * 2, Math.min(nodesCount * 2, numberOfNodes - nodesCount), nodesCount);
         generateNodesCircle(areaCenter, radius * 3, Math.min(nodesCount * 3, numberOfNodes - 3 * nodesCount),nodesCount * 3);
 
+        contextRender.addMouseMotionListener(new MouseInputAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent e) {
+//                super.mouseClicked(e);
+//            }
+//            public void mousePressed(MouseEvent e) {
+//                int x = e.getX();
+//                int y = e.getY();
+//                int curNode = findNodeIndexAtPoint(x, y);
+//                if (SwingUtilities.isLeftMouseButton(e)) {
+//                    if (curNode > -1) {
+//                        selectedNodeIndex = curNode;
+//                        updateView();
+//                    }
+//                }
+//            }
+
+            public void mouseDragged(MouseEvent e) {
+                if (selectedNodeIndex > -1) {
+                    draggingNodeIndex = selectedNodeIndex;
+                    selectedNodeIndex = -1;
+                }
+                if (draggingNodeIndex >  -1) {
+                    nodePositions[draggingNodeIndex] = new Point2D.Double(e.getX(), e.getY());
+                    updateView();
+                }
+            }
+//            public void mouseReleased(MouseEvent e) {
+//                selectedNodeIndex = -1;
+//                updateView();
+//            }
+        });
         contextRender.addMouseListener(new MouseAdapter() {
-            @Override
             public void mousePressed(MouseEvent e) {
                 Point point = e.getPoint();
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    selectedNodeIndex = -1;
-                    for (int i = 0; i < nodePositions.length; i++) {
-                        double difX = point.getX() - nodePositions[i].getX();
-                        double difY = point.getY() - nodePositions[i].getY();
-                        double distance = Math.sqrt(difX * difX + difY * difY);
-                        if (distance <= nodeRadius) {
-                            selectedNodeIndex = i;
-                            break;
-                        }
-                    }
+                    selectedNodeIndex = findNodeIndexAtPoint(point.x, point.y);
                     updateView();
-
                 } else if (SwingUtilities.isRightMouseButton(e)) {
 
                 }
-
             }
         });
         this.paint();
         setVisible(true);
     }
 
+    private int findNodeIndexAtPoint(int x, int y) {
+        int res = -1;
+        for (int i = 0; i < nodePositions.length; i++) {
+            double difX = x - nodePositions[i].getX();
+            double difY = y - nodePositions[i].getY();
+            double distance = Math.sqrt(difX * difX + difY * difY);
+            if (distance <= nodeRadius) {
+                res = i;
+                break;
+            }
+        }
+        return res;
+    }
     private void updateView() {
         this.paint();
     }
