@@ -1,6 +1,6 @@
 package ru.vsu.cs.cousre1.voronetskiy_k_v;
 
-import utils.JTableUtils;
+import ru.vsu.cs.cousre1.voronetskiy_k_v.utils.JTableUtils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

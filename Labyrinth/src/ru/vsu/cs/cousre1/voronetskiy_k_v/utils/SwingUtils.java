@@ -1,4 +1,4 @@
-package utils;
+package ru.vsu.cs.cousre1.voronetskiy_k_v.utils;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
