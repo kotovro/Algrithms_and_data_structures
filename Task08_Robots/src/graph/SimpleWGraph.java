@@ -46,6 +46,7 @@ public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
         adjMatrix[v2][v1] = weight;
     }
 
+
     @Override
     public Iterable<WeightedEdgeTo> adjacenciesWithWeights(int v) {
         return new Iterable<WeightedEdgeTo>() {

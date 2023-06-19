@@ -113,7 +113,9 @@ public class Task08Form extends JFrame {
                     selectedNodeIndex = -1;
                 }
                 if (draggingNodeIndex > -1) {
-                    nodePositions[draggingNodeIndex] = new Point2D.Double(e.getX(), e.getY());
+                    if (e.getX() <= width + padding && e.getX() >= padding && e.getY() >= padding && e.getY() <= padding + height) {
+                        nodePositions[draggingNodeIndex] = new Point2D.Double(e.getX(), e.getY());
+                    }
                     updateView();
                 }
             }
@@ -172,6 +174,7 @@ public class Task08Form extends JFrame {
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, graphicsContext.getWidth(), graphicsContext.getHeight());
 
+        drawEdges(nodePositions, graph, g2d, fontMetrics);
         drawNodesCircle(nodePositions, nodeRadius, g2d, fontMetrics, selectedNodeIndex);
 
         g2d.dispose();
@@ -195,6 +198,17 @@ public class Task08Form extends JFrame {
         }
     }
 
+    private static void drawEdges(Point2D[] nodePositions, SimpleWGraph graph, Graphics2D g2d, FontMetrics fontMetrics) {
+        for (int i = 0; i < graph.vertexCount() - 1; i++) {
+            for (int j = i + 1; j < graph.vertexCount(); j++) {
+                if (graph.getWeight(i, j) != null) {
+                    Line2D edge = new Line2D.Double(nodePositions[i], nodePositions[j]);
+                    g2d.setColor(Color.red);
+                    g2d.draw(edge);
+                }
+            }
+        }
+    }
     private static void drawNodesCircle(Point2D[] nodePositions, int nodeRadius, Graphics2D g2d, FontMetrics fontMetrics, int selectedNode) {
         int i = 0;
 
