@@ -94,7 +94,6 @@ public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
             }
         };
     }
-
     @Override
     public Double getWeight(int v1, int v2) {
         return (adjMatrix[v1][v2] > 0) ? adjMatrix[v1][v2] : null;

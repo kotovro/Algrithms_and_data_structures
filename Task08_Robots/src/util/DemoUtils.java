@@ -1,7 +1,10 @@
 package util;
 
 import graph.SimpleWGraph;
+import task08.Task08Solution;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Random;
 
 public class DemoUtils {
@@ -19,7 +22,7 @@ public class DemoUtils {
             for (int j = i + 1; j < vCount; j++) {
                 int weight = rnd.nextInt(minRandom, maxRandom);
                 if (weight > 0) {
-                    adjMatrix[i][j] = weight + weightsDif;
+                    adjMatrix[i][j] = weight + minWeight - 1;
                     adjMatrix[j][i] = adjMatrix[i][j];
                 }
             }
@@ -59,5 +62,24 @@ public class DemoUtils {
             }
         }
         return new SimpleWGraph(resMatrix);
+    }
+
+    public static LinkedList<Task08Solution.Position[]> repack(Task08Solution.Path[] path) {
+        LinkedList<Task08Solution.Position[]> res = new LinkedList<>();
+        for(Task08Solution.Path p: path) {
+            LinkedList<Task08Solution.Position> list = new LinkedList<>();
+            res.add(listToArray(repack(p, list)));
+        }
+        return res;
+    }
+    public static LinkedList<Task08Solution.Position> repack(Task08Solution.Path path, LinkedList<Task08Solution.Position> result) {
+        if (path != null) {
+            result.add(path.curNode);
+            return repack(path.prevPass, result);
+        }
+        return result;
+    }
+    public static  Task08Solution.Position[] listToArray(LinkedList<Task08Solution.Position> list) {
+        return list.toArray(new Task08Solution.Position[0]);
     }
 }

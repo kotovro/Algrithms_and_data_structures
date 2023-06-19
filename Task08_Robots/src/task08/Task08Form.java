@@ -16,6 +16,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
 import java.util.Random;
 
 import javax.swing.*;
@@ -208,7 +209,20 @@ public class Task08Form extends JFrame {
         setVisible(true);
         buttonGenerateGraph.addActionListener(e -> {
             getRandomGraph();
+            initNodesPositions();
             updateView();
+        });
+        buttonRun.addActionListener(e ->  {
+            int startPos1 = comboRobot1Start.getSelectedIndex();
+            int startPos2 = comboRobot2Start.getSelectedIndex();
+            int startPos3 = comboRobot3Start.getSelectedIndex() - 1;
+            int speed1 = comboRobot1Speed.getSelectedIndex() + 1;
+            int speed2 = comboRobot2Speed.getSelectedIndex() + 1;
+            int speed3 = comboRobot3Speed.getSelectedIndex() + 1;
+            Task08Solution.Path[] path = Task08Solution.getSolution(graph,
+                    startPos1, startPos2, startPos3,
+                    speed1, speed2, speed3);
+            LinkedList<Task08Solution.Position[]> animation = DemoUtils.repack(path);
         });
     }
 
