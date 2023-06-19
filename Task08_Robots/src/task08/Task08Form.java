@@ -152,9 +152,18 @@ public class Task08Form extends JFrame {
                     selectedEdge = null;
                     draggingNodeIndex = -1;
                     if (tmpNodeIndex < 0) {
+                        // add node
                         nodeDialog = new NodeParamsDialog(false, (evt) -> {
                             graph = DemoUtils.addNode(graph);
                             addNodeToGraphics(point);
+                            updateView();
+                        });
+                        nodeDialog.setVisible(true);
+                    } else {
+                        // remove node
+                        nodeDialog = new NodeParamsDialog(true, (evt) -> {
+                            graph = DemoUtils.removeNode(graph, tmpNodeIndex);
+                            removeNodeFromGraphics(tmpNodeIndex);
                             updateView();
                         });
                         nodeDialog.setVisible(true);
