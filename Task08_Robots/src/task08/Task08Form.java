@@ -4,10 +4,11 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import graph.SimpleWGraph;
-import org.apache.xmlgraphics.util.dijkstra.Edge;
 import util.DemoUtils;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -40,9 +41,25 @@ public class Task08Form extends JFrame {
     private Stroke solidStroke = new BasicStroke(3.0f);
     private RenderingHints antialiasing;
     private Random random = new Random();
-    private JButton button1;
     private JPanel contentPanel = new JPanel();
     private JPanel panelButtons;
+    private JPanel panelRobot1;
+    private JComboBox comboRobot1Start;
+    private JComboBox comboRobot1Speed;
+    private JPanel panelRobot2;
+    private JComboBox comboRobot2Start;
+    private JComboBox comboRobot2Speed;
+    private JPanel panelRobot3;
+    private JComboBox comboRobot3Start;
+    private JComboBox comboRobot3Speed;
+    private JPanel panelAnimation;
+    private JButton buttonRun;
+    private JButton buttonGenerateGraph;
+    private JPanel panelGraph;
+    private JTextField textFieldProbability;
+    private JTextField textFieldMaxWeight;
+    private JTextField textFieldMinWeight;
+    private JTextField textFieldVertexCount;
 
     private JScrollPane scrollPane;
     private SimpleWGraph graph;
@@ -73,17 +90,32 @@ public class Task08Form extends JFrame {
         //contentPanel.add(contextRender);
         $$$setupUI$$$();
         contentPanel.setSize(width + padding * 2, height + padding * 2);
+        //panelButtons.setSize(300, 300);
 
-        this.graph = DemoUtils.createTestGraph(numberOfNodes);
+        getRandomGraph();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(true);
         this.setContentPane(panelMain);
         //take advantage of auto-sizing the window based on the size of its contents
-        this.pack();
         this.setLocationRelativeTo(null);
 
-        this.graph = DemoUtils.createTestGraph(numberOfNodes);
+        DefaultComboBoxModel cmbR1StartModel = new DefaultComboBoxModel<>();
+        DefaultComboBoxModel cmbR2StartModel = new DefaultComboBoxModel<>();
+        DefaultComboBoxModel cmbR3StartModel = new DefaultComboBoxModel<>();
+
+
+        cmbR3StartModel.addElement("-");
+
+        for (int i = 0; i < graph.vertexCount(); i++) {
+            cmbR1StartModel.addElement("" + i);
+            cmbR2StartModel.addElement("" + i);
+            cmbR3StartModel.addElement("" + i);
+        }
+        comboRobot1Start.setModel(cmbR1StartModel);
+        comboRobot2Start.setModel(cmbR2StartModel);
+        comboRobot3Start.setModel(cmbR3StartModel);
         initNodesPositions();
+        this.pack();
 
         contextRender.addMouseMotionListener(new MouseInputAdapter() {
             public void mouseDragged(MouseEvent e) {
@@ -174,7 +206,20 @@ public class Task08Form extends JFrame {
         });
         this.paint();
         setVisible(true);
+        buttonGenerateGraph.addActionListener(e -> {
+            getRandomGraph();
+            updateView();
+        });
     }
+
+    private void getRandomGraph() {
+        int vertexCount = Integer.parseInt(textFieldVertexCount.getText());
+        double probability = Double.parseDouble(textFieldProbability.getText());
+        int minWeight = Integer.parseInt(textFieldMinWeight.getText());
+        int maxWeight = Integer.parseInt(textFieldMaxWeight.getText());
+        graph = DemoUtils.createTestGraph(vertexCount, probability, minWeight, maxWeight);
+    }
+
     private void safeRemoveDialog(JDialog dialog) {
         if (dialog != null) {
             dialog.setVisible(false);
@@ -182,6 +227,7 @@ public class Task08Form extends JFrame {
             dialog = null;
         }
     }
+
     private int findNodeIndexAtPoint(int x, int y) {
         int res = -1;
         for (int i = 0; i < nodePositions.length; i++) {
@@ -318,6 +364,7 @@ public class Task08Form extends JFrame {
         Ellipse2D.Double myCircle = new Ellipse2D.Double(center.getX() - radius, center.getY() - radius, 2 * radius, 2 * radius);
         return myCircle;
     }
+
     private void initNodesPositions() {
         Point2D areaCenter = new Point2D.Double((double) width / 2 + padding, (double) height / 2 + padding);
 
@@ -328,6 +375,7 @@ public class Task08Form extends JFrame {
         generateNodesCircle(areaCenter, radius * 2, Math.min(nodesCount * 2, graph.vertexCount() - nodesCount), nodesCount);
         generateNodesCircle(areaCenter, radius * 3, Math.min(nodesCount * 3, graph.vertexCount() - 3 * nodesCount), nodesCount * 3);
     }
+
     private void removeNodeFromGraphics(int removeNodeIndex) {
         Point2D[] tmp = new Point2D[graph.vertexCount()];
         int i = 0;
@@ -341,6 +389,7 @@ public class Task08Form extends JFrame {
         }
         nodePositions = tmp;
     }
+
     private void addNodeToGraphics(Point2D newNodePosition) {
         Point2D[] tmp = new Point2D[graph.vertexCount()];
         for (int i = 0; i < graph.vertexCount() - 1; i++) {
@@ -362,7 +411,7 @@ public class Task08Form extends JFrame {
         panelMain = new JPanel();
         panelMain.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         final JSplitPane splitPane1 = new JSplitPane();
-        panelMain.add(splitPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
+        panelMain.add(splitPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         contentPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         splitPane1.setRightComponent(contentPanel);
         contextRender.setText("");
@@ -370,15 +419,127 @@ public class Task08Form extends JFrame {
         final Spacer spacer1 = new Spacer();
         contentPanel.add(spacer1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         panelButtons = new JPanel();
-        panelButtons.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.setLayout(new GridLayoutManager(7, 1, new Insets(0, 0, 0, 0), -1, -1));
         splitPane1.setLeftComponent(panelButtons);
-        button1 = new JButton();
-        button1.setText("Button");
-        panelButtons.add(button1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panelRobot3 = new JPanel();
+        panelRobot3.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.add(panelRobot3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        comboRobot3Start = new JComboBox();
+        final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+        defaultComboBoxModel1.addElement("0");
+        comboRobot3Start.setModel(defaultComboBoxModel1);
+        panelRobot3.add(comboRobot3Start, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        comboRobot3Speed = new JComboBox();
+        final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
+        defaultComboBoxModel2.addElement("1");
+        defaultComboBoxModel2.addElement("2");
+        comboRobot3Speed.setModel(defaultComboBoxModel2);
+        panelRobot3.add(comboRobot3Speed, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setText("Старт в:");
+        panelRobot3.add(label1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("Скорость:");
+        panelRobot3.add(label2, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("Робот 3");
+        panelRobot3.add(label3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panelRobot2 = new JPanel();
+        panelRobot2.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.add(panelRobot2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        comboRobot2Start = new JComboBox();
+        final DefaultComboBoxModel defaultComboBoxModel3 = new DefaultComboBoxModel();
+        defaultComboBoxModel3.addElement("0");
+        comboRobot2Start.setModel(defaultComboBoxModel3);
+        panelRobot2.add(comboRobot2Start, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        comboRobot2Speed = new JComboBox();
+        final DefaultComboBoxModel defaultComboBoxModel4 = new DefaultComboBoxModel();
+        defaultComboBoxModel4.addElement("1");
+        defaultComboBoxModel4.addElement("2");
+        comboRobot2Speed.setModel(defaultComboBoxModel4);
+        panelRobot2.add(comboRobot2Speed, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label4 = new JLabel();
+        label4.setText("Старт в:");
+        panelRobot2.add(label4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label5 = new JLabel();
+        label5.setText("Скорость:");
+        panelRobot2.add(label5, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label6 = new JLabel();
+        label6.setText("Робот 2");
+        panelRobot2.add(label6, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panelRobot1 = new JPanel();
+        panelRobot1.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.add(panelRobot1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        comboRobot1Start = new JComboBox();
+        final DefaultComboBoxModel defaultComboBoxModel5 = new DefaultComboBoxModel();
+        defaultComboBoxModel5.addElement("0");
+        comboRobot1Start.setModel(defaultComboBoxModel5);
+        panelRobot1.add(comboRobot1Start, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        comboRobot1Speed = new JComboBox();
+        final DefaultComboBoxModel defaultComboBoxModel6 = new DefaultComboBoxModel();
+        defaultComboBoxModel6.addElement("1");
+        defaultComboBoxModel6.addElement("2");
+        comboRobot1Speed.setModel(defaultComboBoxModel6);
+        panelRobot1.add(comboRobot1Speed, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label7 = new JLabel();
+        label7.setText("Старт в:");
+        panelRobot1.add(label7, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label8 = new JLabel();
+        label8.setText("Скорость:");
+        panelRobot1.add(label8, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label9 = new JLabel();
+        label9.setText("Робот 1");
+        panelRobot1.add(label9, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JSeparator separator1 = new JSeparator();
+        panelButtons.add(separator1, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panelAnimation = new JPanel();
+        panelAnimation.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.add(panelAnimation, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        buttonRun = new JButton();
+        buttonRun.setText("Запустить");
+        panelAnimation.add(buttonRun, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        panelButtons.add(spacer2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panelAnimation.add(spacer2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
-        panelButtons.add(spacer3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panelAnimation.add(spacer3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panelGraph = new JPanel();
+        panelGraph.setLayout(new GridLayoutManager(5, 3, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.add(panelGraph, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        textFieldVertexCount = new JTextField();
+        textFieldVertexCount.setText("12");
+        panelGraph.add(textFieldVertexCount, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label10 = new JLabel();
+        label10.setText("Количество вершин:");
+        panelGraph.add(label10, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        textFieldProbability = new JTextField();
+        textFieldProbability.setText("0.4");
+        panelGraph.add(textFieldProbability, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        buttonGenerateGraph = new JButton();
+        buttonGenerateGraph.setText("Сгенерировать случайный граф");
+        panelGraph.add(buttonGenerateGraph, new GridConstraints(4, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        textFieldMinWeight = new JTextField();
+        textFieldMinWeight.setText("1");
+        panelGraph.add(textFieldMinWeight, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        textFieldMaxWeight = new JTextField();
+        textFieldMaxWeight.setText("1");
+        panelGraph.add(textFieldMaxWeight, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label11 = new JLabel();
+        label11.setText("Вероятность связи:");
+        panelGraph.add(label11, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label12 = new JLabel();
+        label12.setText("Минимальный вес:");
+        panelGraph.add(label12, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label13 = new JLabel();
+        label13.setText("Максимальный вес");
+        panelGraph.add(label13, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer4 = new Spacer();
+        panelGraph.add(spacer4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer5 = new Spacer();
+        panelGraph.add(spacer5, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer6 = new Spacer();
+        panelGraph.add(spacer6, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer7 = new Spacer();
+        panelGraph.add(spacer7, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
     }
 
     /**

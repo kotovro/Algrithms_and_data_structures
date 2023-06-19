@@ -5,13 +5,23 @@ import graph.SimpleWGraph;
 import java.util.Random;
 
 public class DemoUtils {
-    public static SimpleWGraph createTestGraph(int vCount) {
-        Random rnd = new Random();
+    public static SimpleWGraph createTestGraph(int vCount, double probability, int minWeight, int maxWeight) {
         double[][] adjMatrix = new double[vCount][vCount];
+
+        Random rnd = new Random();
+        int weightsDif = maxWeight - minWeight;
+        int weightsCount = weightsDif + 1;
+        int maxRandom = weightsCount + 1;
+        int optionsCount = (int) Math.ceil((double) weightsCount / probability);
+        int minRandom = maxRandom - optionsCount;
+
         for (int i = 0; i < vCount - 1; i++) {
             for (int j = i + 1; j < vCount; j++) {
-                adjMatrix[i][j] = rnd.nextInt(-20, 10);
-                adjMatrix[j][i] = adjMatrix[i][j];
+                int weight = rnd.nextInt(minRandom, maxRandom);
+                if (weight > 0) {
+                    adjMatrix[i][j] = weight + weightsDif;
+                    adjMatrix[j][i] = adjMatrix[i][j];
+                }
             }
         }
         return new SimpleWGraph(adjMatrix);
