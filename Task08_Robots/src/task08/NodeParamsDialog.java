@@ -2,7 +2,6 @@ package task08;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import task08.GraphicNode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,36 +9,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class NodeParamsDialog extends JDialog {
-    private JButton buttonRemoveNode;
-    private JButton buttonAddNode;
+    private JButton buttonCancel;
+    private JButton buttonOk;
     private JPanel panelDialog;
 
-    public NodeParamsDialog(GraphicNode node) {
+    public NodeParamsDialog(ActionListener removeNode) {
         this.setContentPane(panelDialog);
         this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        this.setTitle("Удалить вершину");
         this.pack();
 
         this.setResizable(false);
-        this.setTitle("Node parameters");
-        if (node.getIndex() > -1) {
-            buttonAddNode.setVisible(false);
-            buttonRemoveNode.setVisible(true);
-        } else {
-            buttonAddNode.setVisible(true);
-            buttonRemoveNode.setVisible(false);
-        }
+        this.setLocationRelativeTo(null);
 
-        buttonAddNode.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
+        buttonOk.addActionListener(e -> {
+            removeNode.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "removeNode"));
+            setVisible(false);
         });
-        buttonRemoveNode.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
+        buttonCancel.addActionListener(e -> {
+            this.setVisible(false);
         });
     }
 
@@ -64,12 +52,12 @@ public class NodeParamsDialog extends JDialog {
     private void $$$setupUI$$$() {
         panelDialog = new JPanel();
         panelDialog.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-        buttonAddNode = new JButton();
-        buttonAddNode.setText("Add node");
-        panelDialog.add(buttonAddNode, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        buttonRemoveNode = new JButton();
-        buttonRemoveNode.setText("Remove node");
-        panelDialog.add(buttonRemoveNode, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        buttonCancel = new JButton();
+        buttonCancel.setText("Cancel");
+        panelDialog.add(buttonCancel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        buttonOk = new JButton();
+        buttonOk.setText("Remove");
+        panelDialog.add(buttonOk, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
@@ -78,4 +66,5 @@ public class NodeParamsDialog extends JDialog {
     public JComponent $$$getRootComponent$$$() {
         return panelDialog;
     }
+
 }

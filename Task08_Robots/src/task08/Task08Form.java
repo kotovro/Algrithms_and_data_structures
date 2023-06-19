@@ -48,6 +48,7 @@ public class Task08Form extends JFrame {
     private SimpleWGraph graph;
     private SimpleWGraph.GraphEdge selectedEdge = null;
     private EdgeParamsDialog edgeDialog = null;
+    private NodeParamsDialog nodeDialog = null;
     //private NodeParamsDialog nodeDialogParams = new NodeParamsDialog();
 
     public static void main(String[] args) {
@@ -82,16 +83,7 @@ public class Task08Form extends JFrame {
         this.setLocationRelativeTo(null);
 
         this.graph = DemoUtils.createTestGraph(numberOfNodes);
-
-        Point2D areaCenter = new Point2D.Double((double) width / 2 + padding, (double) height / 2 + padding);
-
-
-        int radius = Math.min(height / 2, width / 2) / 3;
-        int nodesCount = Math.max(3, Math.ceilDiv(graph.vertexCount(), 5));
-        nodePositions = new Point2D[graph.vertexCount()];
-        generateNodesCircle(areaCenter, radius, nodesCount, 0);
-        generateNodesCircle(areaCenter, radius * 2, Math.min(nodesCount * 2, graph.vertexCount() - nodesCount), nodesCount);
-        generateNodesCircle(areaCenter, radius * 3, Math.min(nodesCount * 3, graph.vertexCount() - 3 * nodesCount), nodesCount * 3);
+        initNodesPositions();
 
         contextRender.addMouseMotionListener(new MouseInputAdapter() {
             public void mouseDragged(MouseEvent e) {
@@ -112,25 +104,33 @@ public class Task08Form extends JFrame {
         contextRender.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 Point point = e.getPoint();
-                if (edgeDialog != null) {
-                    edgeDialog.setVisible(false);
-                    edgeDialog.dispose();
-                    edgeDialog = null;
-                }
+                safeRemoveDialog(edgeDialog);
+                safeRemoveDialog(nodeDialog);
+
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     int tmpNodeIndex = findNodeIndexAtPoint(point.x, point.y);
                     if (selectedNodeIndex >= 0 && tmpNodeIndex >= 0 && tmpNodeIndex != selectedNodeIndex) {
+                        // edit or add new edge between selected vertexes
                         Double weight = graph.getWeight(tmpNodeIndex, selectedNodeIndex);
                         selectedEdge = new SimpleWGraph.GraphEdge(selectedNodeIndex, tmpNodeIndex,
                                 (weight == null ? 1 : weight));
                         selectedNodeIndex = -1;
-                        edgeDialog = new EdgeParamsDialog(selectedEdge, (evt) -> {
+                        edgeDialog = new EdgeParamsDialog(selectedEdge, weight != null, (evt) -> {
                             graph.setWeight(selectedEdge);
                             selectedEdge = null;
                             updateView();
                         });
                         edgeDialog.setVisible(true);
-                    } else if (selectedNodeIndex < 0) {
+                    } else if (selectedNodeIndex >= 0 && tmpNodeIndex == selectedNodeIndex) {
+                        // remove node
+                        nodeDialog = new NodeParamsDialog((evt) -> {
+                            graph = DemoUtils.removeNode(graph, tmpNodeIndex);
+                            removeNodeFromGraphics(tmpNodeIndex);
+                            selectedNodeIndex = -1;
+                            updateView();
+                        });
+                        nodeDialog.setVisible(true);
+                    } else if (selectedNodeIndex < 0 && tmpNodeIndex >= 0) {
                         selectedNodeIndex = tmpNodeIndex;
                         selectedEdge = null;
                     }
@@ -139,7 +139,7 @@ public class Task08Form extends JFrame {
                         draggingNodeIndex = -1;
                         selectedNodeIndex = -1;
                         if (selectedEdge != null) {
-                            edgeDialog = new EdgeParamsDialog(selectedEdge, (evt) -> {
+                            edgeDialog = new EdgeParamsDialog(selectedEdge, true, (evt) -> {
                                 graph.setWeight(selectedEdge);
                                 selectedEdge = null;
                                 updateView();
@@ -157,7 +157,13 @@ public class Task08Form extends JFrame {
         this.paint();
         setVisible(true);
     }
-
+    private void safeRemoveDialog(JDialog dialog) {
+        if (dialog != null) {
+            dialog.setVisible(false);
+            dialog.dispose();
+            dialog = null;
+        }
+    }
     private int findNodeIndexAtPoint(int x, int y) {
         int res = -1;
         for (int i = 0; i < nodePositions.length; i++) {
@@ -293,6 +299,29 @@ public class Task08Form extends JFrame {
     private static Ellipse2D getCircleByCenter(Point2D center, double radius) {
         Ellipse2D.Double myCircle = new Ellipse2D.Double(center.getX() - radius, center.getY() - radius, 2 * radius, 2 * radius);
         return myCircle;
+    }
+    private void initNodesPositions() {
+        Point2D areaCenter = new Point2D.Double((double) width / 2 + padding, (double) height / 2 + padding);
+
+        int radius = Math.min(height / 2, width / 2) / 3;
+        int nodesCount = Math.max(3, Math.ceilDiv(graph.vertexCount(), 5));
+        nodePositions = new Point2D[graph.vertexCount()];
+        generateNodesCircle(areaCenter, radius, nodesCount, 0);
+        generateNodesCircle(areaCenter, radius * 2, Math.min(nodesCount * 2, graph.vertexCount() - nodesCount), nodesCount);
+        generateNodesCircle(areaCenter, radius * 3, Math.min(nodesCount * 3, graph.vertexCount() - 3 * nodesCount), nodesCount * 3);
+    }
+    private void removeNodeFromGraphics(int removeNodeIndex) {
+        Point2D[] tmp = new Point2D[graph.vertexCount()];
+        int i = 0;
+        int newI = 0;
+        while (i < graph.vertexCount() + 1) {
+            if (i != removeNodeIndex) {
+                tmp[newI] = nodePositions[i];
+                newI++;
+            }
+            i++;
+        }
+        nodePositions = tmp;
     }
 
     /**
