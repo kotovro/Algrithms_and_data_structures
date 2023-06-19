@@ -4,7 +4,9 @@ import java.util.Iterator;
 
 public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
 
-    public class Edge implements WeightedEdgeTo{
+
+
+    public static class GraphEdge implements WeightedEdgeTo{
         private int vFrom;
         private int vTo;
         private double weight;
@@ -17,11 +19,20 @@ public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
             return weight;
         }
 
-        public Edge(int v1, int v2, double weight) {
+        public GraphEdge(int v1, int v2, double weight) {
             vFrom = v1;
             vTo = v2;
             this.weight = weight;
         }
+
+        public int from() {
+            return vFrom;
+        }
+
+        public void setWeight(double weight) {
+            this.weight = weight;
+        }
+
     }
     double[][] adjMatrix;
 
@@ -55,7 +66,7 @@ public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
             public Iterator<WeightedEdgeTo> iterator() {
                 for (int i = 0; i < adjMatrix.length; i++) {
                     if (adjMatrix[v][i] > 0) {
-                        nextAdj = new Edge(v, i, adjMatrix[v][i]);
+                        nextAdj = new GraphEdge(v, i, adjMatrix[v][i]);
                         break;
                     }
                 }
@@ -73,7 +84,7 @@ public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
 
                         for (int i = result.to() + 1; i < adjMatrix.length; i++) {
                             if (adjMatrix[v][i] > 0) {
-                                nextAdj = new Edge(v, i, adjMatrix[v][i]);
+                                nextAdj = new GraphEdge(v, i, adjMatrix[v][i]);
                                 break;
                             }
                         }
@@ -89,6 +100,10 @@ public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
         return (adjMatrix[v1][v2] > 0) ? adjMatrix[v1][v2] : null;
     }
 
+    public void setWeight(GraphEdge edge) {
+        adjMatrix[edge.from()][edge.to()] = edge.weight();
+        adjMatrix[edge.to()][edge.from()] = edge.weight();
+    }
 
 
 

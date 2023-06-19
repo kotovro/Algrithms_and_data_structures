@@ -10,7 +10,8 @@ public class DemoUtils {
         double[][] adjMatrix = new double[vCount][vCount];
         for (int i = 0; i < vCount - 1; i++) {
             for (int j = i + 1; j < vCount; j++) {
-                adjMatrix[i][j] = rnd.nextInt(-10, 10);
+                adjMatrix[i][j] = rnd.nextInt(-20, 10);
+                adjMatrix[j][i] = adjMatrix[i][j];
             }
         }
         return new SimpleWGraph(adjMatrix);

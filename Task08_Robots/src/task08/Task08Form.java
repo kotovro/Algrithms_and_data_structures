@@ -4,6 +4,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import graph.SimpleWGraph;
+import org.apache.xmlgraphics.util.dijkstra.Edge;
 import util.DemoUtils;
 
 import java.awt.*;
@@ -21,7 +22,7 @@ import javax.swing.event.MouseInputAdapter;
 
 
 public class Task08Form extends JFrame {
-    private int numberOfNodes = 25;
+    private int numberOfNodes = 12;
     private int nodeRadius = 15;
 
     private int selectedNodeIndex = -1;
@@ -45,6 +46,8 @@ public class Task08Form extends JFrame {
 
     private JScrollPane scrollPane;
     private SimpleWGraph graph;
+    private SimpleWGraph.GraphEdge selectedEdge = null;
+    private EdgeParamsDialog edgeDialog = null;
     //private NodeParamsDialog nodeDialogParams = new NodeParamsDialog();
 
     public static void main(String[] args) {
@@ -91,22 +94,6 @@ public class Task08Form extends JFrame {
         generateNodesCircle(areaCenter, radius * 3, Math.min(nodesCount * 3, graph.vertexCount() - 3 * nodesCount), nodesCount * 3);
 
         contextRender.addMouseMotionListener(new MouseInputAdapter() {
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                super.mouseClicked(e);
-//            }
-//            public void mousePressed(MouseEvent e) {
-//                int x = e.getX();
-//                int y = e.getY();
-//                int curNode = findNodeIndexAtPoint(x, y);
-//                if (SwingUtilities.isLeftMouseButton(e)) {
-//                    if (curNode > -1) {
-//                        selectedNodeIndex = curNode;
-//                        updateView();
-//                    }
-//                }
-//            }
-
             public void mouseDragged(MouseEvent e) {
                 if (selectedNodeIndex > -1) {
                     draggingNodeIndex = selectedNodeIndex;
@@ -115,20 +102,51 @@ public class Task08Form extends JFrame {
                 if (draggingNodeIndex > -1) {
                     if (e.getX() <= width + padding && e.getX() >= padding && e.getY() >= padding && e.getY() <= padding + height) {
                         nodePositions[draggingNodeIndex] = new Point2D.Double(e.getX(), e.getY());
+                    } else {
+                        draggingNodeIndex = -1;
                     }
                     updateView();
                 }
             }
-//            public void mouseReleased(MouseEvent e) {
-//                selectedNodeIndex = -1;
-//                updateView();
-//            }
         });
         contextRender.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 Point point = e.getPoint();
+                if (edgeDialog != null) {
+                    edgeDialog.setVisible(false);
+                    edgeDialog.dispose();
+                    edgeDialog = null;
+                }
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    selectedNodeIndex = findNodeIndexAtPoint(point.x, point.y);
+                    int tmpNodeIndex = findNodeIndexAtPoint(point.x, point.y);
+                    if (selectedNodeIndex >= 0 && tmpNodeIndex >= 0 && tmpNodeIndex != selectedNodeIndex) {
+                        Double weight = graph.getWeight(tmpNodeIndex, selectedNodeIndex);
+                        selectedEdge = new SimpleWGraph.GraphEdge(selectedNodeIndex, tmpNodeIndex,
+                                (weight == null ? 1 : weight));
+                        selectedNodeIndex = -1;
+                        edgeDialog = new EdgeParamsDialog(selectedEdge, (evt) -> {
+                            graph.setWeight(selectedEdge);
+                            selectedEdge = null;
+                            updateView();
+                        });
+                        edgeDialog.setVisible(true);
+                    } else if (selectedNodeIndex < 0) {
+                        selectedNodeIndex = tmpNodeIndex;
+                        selectedEdge = null;
+                    }
+                    if (tmpNodeIndex < 0) {
+                        selectedEdge = findEdgeAtPoint(point.x, point.y);
+                        draggingNodeIndex = -1;
+                        selectedNodeIndex = -1;
+                        if (selectedEdge != null) {
+                            edgeDialog = new EdgeParamsDialog(selectedEdge, (evt) -> {
+                                graph.setWeight(selectedEdge);
+                                selectedEdge = null;
+                                updateView();
+                            });
+                            edgeDialog.setVisible(true);
+                        }
+                    }
                     updateView();
                 } else if (SwingUtilities.isRightMouseButton(e)) {
 //                    nodeDialogParams.updateView();
@@ -143,15 +161,35 @@ public class Task08Form extends JFrame {
     private int findNodeIndexAtPoint(int x, int y) {
         int res = -1;
         for (int i = 0; i < nodePositions.length; i++) {
-            double difX = x - nodePositions[i].getX();
-            double difY = y - nodePositions[i].getY();
-            double distance = Math.sqrt(difX * difX + difY * difY);
+            double distance = getDistance(nodePositions[i], new Point2D.Double(x, y));
             if (distance <= nodeRadius) {
                 res = i;
                 break;
             }
         }
         return res;
+    }
+
+    private SimpleWGraph.GraphEdge findEdgeAtPoint(int x, int y) {
+        for (int i = 0; i < graph.vertexCount() - 1; i++) {
+            for (int j = i + 1; j < graph.vertexCount(); j++) {
+                if (graph.getWeight(i, j) != null) {
+                    Point2D middlePoint = new Point2D.Double((nodePositions[i].getX() + nodePositions[j].getX()) / 2,
+                            (nodePositions[i].getY() + nodePositions[j].getY()) / 2);
+                    double distance = getDistance(middlePoint, new Point2D.Double(x, y));
+                    if (distance < 10) {
+                        return new SimpleWGraph.GraphEdge(i, j, graph.getWeight(i, j));
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private double getDistance(Point2D p1, Point2D p2) {
+        double difX = p1.getX() - p2.getX();
+        double difY = p1.getY() - p2.getY();
+        return Math.sqrt(difX * difX + difY * difY);
     }
 
     private void updateView() {
@@ -174,7 +212,7 @@ public class Task08Form extends JFrame {
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, graphicsContext.getWidth(), graphicsContext.getHeight());
 
-        drawEdges(nodePositions, graph, g2d, fontMetrics);
+        drawEdges(nodePositions, selectedEdge, graph, g2d, fontMetrics);
         drawNodesCircle(nodePositions, nodeRadius, g2d, fontMetrics, selectedNodeIndex);
 
         g2d.dispose();
@@ -198,17 +236,27 @@ public class Task08Form extends JFrame {
         }
     }
 
-    private static void drawEdges(Point2D[] nodePositions, SimpleWGraph graph, Graphics2D g2d, FontMetrics fontMetrics) {
+    private static void drawEdges(Point2D[] nodePositions, SimpleWGraph.GraphEdge selectedEdge, SimpleWGraph graph, Graphics2D g2d, FontMetrics fontMetrics) {
         for (int i = 0; i < graph.vertexCount() - 1; i++) {
             for (int j = i + 1; j < graph.vertexCount(); j++) {
                 if (graph.getWeight(i, j) != null) {
                     Line2D edge = new Line2D.Double(nodePositions[i], nodePositions[j]);
-                    g2d.setColor(Color.red);
+                    String itemString = "" + Math.round(graph.getWeight(i, j));
+                    Rectangle2D itemStringBounds = fontMetrics.getStringBounds(itemString, g2d);
+                    if (selectedEdge != null && (selectedEdge.to() == j && selectedEdge.from() == i || selectedEdge.to() == i && selectedEdge.from() == j)) {
+                        g2d.setColor(Color.gray);
+                    } else {
+                        g2d.setColor(Color.red);
+                    }
+                    double textX = (nodePositions[i].getX() + nodePositions[j].getX()) / 2;// - itemStringBounds.getWidth();
+                    double textY = (nodePositions[i].getY() + nodePositions[j].getY()) / 2;// - itemStringBounds.getHeight();
+                    g2d.drawString("" + Math.round(graph.getWeight(i, j)), (float) textX, (float) textY);
                     g2d.draw(edge);
                 }
             }
         }
     }
+
     private static void drawNodesCircle(Point2D[] nodePositions, int nodeRadius, Graphics2D g2d, FontMetrics fontMetrics, int selectedNode) {
         int i = 0;
 
