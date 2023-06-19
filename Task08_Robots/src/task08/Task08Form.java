@@ -106,9 +106,8 @@ public class Task08Form extends JFrame {
                 Point point = e.getPoint();
                 safeRemoveDialog(edgeDialog);
                 safeRemoveDialog(nodeDialog);
-
+                int tmpNodeIndex = findNodeIndexAtPoint(point.x, point.y);
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    int tmpNodeIndex = findNodeIndexAtPoint(point.x, point.y);
                     if (selectedNodeIndex >= 0 && tmpNodeIndex >= 0 && tmpNodeIndex != selectedNodeIndex) {
                         // edit or add new edge between selected vertexes
                         Double weight = graph.getWeight(tmpNodeIndex, selectedNodeIndex);
@@ -123,7 +122,7 @@ public class Task08Form extends JFrame {
                         edgeDialog.setVisible(true);
                     } else if (selectedNodeIndex >= 0 && tmpNodeIndex == selectedNodeIndex) {
                         // remove node
-                        nodeDialog = new NodeParamsDialog((evt) -> {
+                        nodeDialog = new NodeParamsDialog(true, (evt) -> {
                             graph = DemoUtils.removeNode(graph, tmpNodeIndex);
                             removeNodeFromGraphics(tmpNodeIndex);
                             selectedNodeIndex = -1;
@@ -149,8 +148,18 @@ public class Task08Form extends JFrame {
                     }
                     updateView();
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-//                    nodeDialogParams.updateView();
-//                    nodeDialogParams.setVisible(true);
+                    selectedNodeIndex = -1;
+                    selectedEdge = null;
+                    draggingNodeIndex = -1;
+                    if (tmpNodeIndex < 0) {
+                        nodeDialog = new NodeParamsDialog(false, (evt) -> {
+                            graph = DemoUtils.addNode(graph);
+                            addNodeToGraphics(point);
+                            updateView();
+                        });
+                        nodeDialog.setVisible(true);
+                    }
+                    updateView();
                 }
             }
         });
@@ -321,6 +330,14 @@ public class Task08Form extends JFrame {
             }
             i++;
         }
+        nodePositions = tmp;
+    }
+    private void addNodeToGraphics(Point2D newNodePosition) {
+        Point2D[] tmp = new Point2D[graph.vertexCount()];
+        for (int i = 0; i < graph.vertexCount() - 1; i++) {
+            tmp[i] = nodePositions[i];
+        }
+        tmp[graph.vertexCount() - 1] = newNodePosition;
         nodePositions = tmp;
     }
 

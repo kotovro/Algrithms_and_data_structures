@@ -38,4 +38,16 @@ public class DemoUtils {
         }
         return new SimpleWGraph(resMatrix);
     }
+    public static SimpleWGraph addNode(SimpleWGraph graph) {
+        double[][] resMatrix = new double[graph.vertexCount() + 1][graph.vertexCount() + 1];
+
+        for (int i = 0; i < graph.vertexCount() - 1; i++) {
+            for (int j = i + 1; j < graph.vertexCount(); j++) {
+                Double weight = graph.getWeight(i, j);
+                resMatrix[i][j] = (weight == null) ? 0 : weight;
+                resMatrix[j][i] = resMatrix[i][j];
+            }
+        }
+        return new SimpleWGraph(resMatrix);
+    }
 }
