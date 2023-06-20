@@ -2,10 +2,7 @@ package ru.vsu.cs.course1.tree.bst;
 
 import ru.vsu.cs.course1.tree.BinaryTree;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Stack;
 
 /**
@@ -158,43 +155,16 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
     }
     default Iterable<T> iterateFromTo(T valueFrom, T valueTo) {
         if (valueTo.compareTo(valueFrom) < 0) {
+            //either reduce the amount of checks in the first node, because we do need to compare elements with
+            //From element, compare only with next
             throw new IllegalArgumentException("The end value has to be greater than initial one!");
         }
         return new Iterable<T>() {
-            private Stack<TreeNode<T>> stack = null;
-            private TreeNode<T> findFirstNode(TreeNode<T> node) {
-                if (node == null) {
-                    return null;
-                }
-                int cmp = valueFrom.compareTo(node.getValue());
-                if (cmp == 0) {
-                    return node;
-                } else if (cmp > 0) {
-                    return findFirstNode(node.getRight());
-                } else {
-                    BinaryTree.TreeNode<T> res = findFirstNode(node.getLeft());
-                    if (res != null) {
-                        if (node.getValue().compareTo(valueTo) < 1) {
-                            stack.push(node);
-                        }
-                        return res;
-                    } else {
-                        if (node.getValue().compareTo(valueTo) < 1) {
-                            return node;
-                        } else {
-                            return null;
-                        }
-                    }
-                }
-            }
             @Override
             public Iterator<T> iterator() {
-                stack = new Stack<>();
-                TreeNode<T> first = findFirstNode(getRoot());
-
-
                 return new Iterator<T>() {
-                    private TreeNode<T> next = first;
+                    private Stack<TreeNode<T>> stack = new Stack<>();
+                    private TreeNode<T> next = findNextNode(getRoot());
                     @Override
                     public boolean hasNext() {
                         return next != null;
@@ -202,7 +172,7 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
 
                     @Override
                     public T next() {
-                        TreeNode<T> tmp = findFirstNode(next.getRight());
+                        TreeNode<T> tmp = findNextNode(next.getRight());
                         if (tmp != null) {
                             stack.push(tmp);
                         }
@@ -213,6 +183,31 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
                             next = stack.pop();
                         }
                         return result.getValue();
+                    }
+                    private TreeNode<T> findNextNode(TreeNode<T> node) {
+                        if (node == null) {
+                            return null;
+                        }
+                        int cmp = (next == null) ? valueFrom.compareTo(node.getValue()) : -1;
+                        if (cmp == 0) {
+                            return node;
+                        } else if (cmp > 0) {
+                            return findNextNode(node.getRight());
+                        } else {
+                            BinaryTree.TreeNode<T> res = findNextNode(node.getLeft());
+                            if (res != null) {
+                                if (node.getValue().compareTo(valueTo) < 1) {
+                                    stack.push(node);
+                                }
+                                return res;
+                            } else {
+                                if (node.getValue().compareTo(valueTo) < 1) {
+                                    return node;
+                                } else {
+                                    return null;
+                                }
+                            }
+                        }
                     }
                 };
             }
