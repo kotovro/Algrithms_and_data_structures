@@ -1,4 +1,4 @@
-package utils;
+package ru.vsu.cs.cousre1.voronetskiy_k_v.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -282,11 +282,11 @@ public class ArrayUtils {
     }
     
     public static int[] readIntArrayFromConsole(String arrName) {
-        return readArrayFromConsole(arrName, utils.ArrayUtils::toIntArray);
+        return readArrayFromConsole(arrName, ru.vsu.cs.cousre1.voronetskiy_k_v.utils.ArrayUtils::toIntArray);
     }
     
     public static double[] readDoubleArrayFromConsole(String arrName) {
-        return readArrayFromConsole(arrName, utils.ArrayUtils::toDoubleArray);
+        return readArrayFromConsole(arrName, ru.vsu.cs.cousre1.voronetskiy_k_v.utils.ArrayUtils::toDoubleArray);
     }
     */
     

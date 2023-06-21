@@ -1,7 +1,5 @@
 package ru.vsu.cs.cousre1.voronetskiy_k_v;
 
-import utils.JTableUtils;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

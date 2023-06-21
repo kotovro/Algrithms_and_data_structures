@@ -1,7 +1,7 @@
 package ru.vsu.cs.cousre1.voronetskiy_k_v;
 
-import utils.JTableUtils;
-import utils.SwingUtils;
+import ru.vsu.cs.cousre1.voronetskiy_k_v.utils.JTableUtils;
+import ru.vsu.cs.cousre1.voronetskiy_k_v.utils.SwingUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;

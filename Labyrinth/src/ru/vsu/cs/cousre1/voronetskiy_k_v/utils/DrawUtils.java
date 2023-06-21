@@ -1,4 +1,4 @@
-package utils;
+package ru.vsu.cs.cousre1.voronetskiy_k_v.utils;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
