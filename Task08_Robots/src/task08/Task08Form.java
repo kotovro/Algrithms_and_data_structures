@@ -495,7 +495,18 @@ public class Task08Form extends JFrame {
         int robotNum = 0;
         for (Task08Solution.Position[] frames : animation) {
             if (frames.length > 0) {
-                robotPositions[robotNum] = calculateRobotPosition(frames[currentAnimationFrame]);
+                double difX = 0;
+                double difY = 0;
+                if (robotNum == 0) {
+                    difY = nodeRadius;
+                } else if (robotNum == 1) {
+                    difY = -((double) nodeRadius) / 2;
+                    difX = -nodeRadius * 0.866;
+                } else {
+                    difY = -((double) nodeRadius) / 2;
+                    difX = nodeRadius * 0.866;
+                }
+                robotPositions[robotNum] = calculateRobotPosition(frames[currentAnimationFrame], difX, difY);
             }
             robotNum++;
         }
@@ -503,19 +514,19 @@ public class Task08Form extends JFrame {
         updateView();
     }
 
-    private Point2D calculateRobotPosition(Task08Solution.Position position) {
+    private Point2D calculateRobotPosition(Task08Solution.Position position, double difX, double difY) {
         Point2D endPoint = nodePositions[position.getTargetNode()];
         if (position.getDistance() == 0) {
-            return endPoint;
+            return new Point2D.Double(endPoint.getX() + difX, endPoint.getY() + difY);
         }
         Point2D startPoint = nodePositions[position.getStartNode()];
         double edgeLen = getDistance(startPoint, endPoint);
         double weight = graph.getWeight(position.getStartNode(), position.getTargetNode());
         double distanceLen = edgeLen / weight * position.getDistance();
-        return solveQuadraticSystem(startPoint, endPoint, edgeLen - distanceLen, distanceLen);
+        return solveQuadraticSystem(startPoint, endPoint, edgeLen - distanceLen, distanceLen, difX, difY);
     }
 
-    private Point2D solveQuadraticSystem(Point2D start, Point2D end, double len0, double len1) {
+    private Point2D solveQuadraticSystem(Point2D start, Point2D end, double len0, double len1, double difX, double difY) {
         double x0 = start.getX();
         double x1 = end.getX();
         double y0 = start.getY();
@@ -528,7 +539,7 @@ public class Task08Form extends JFrame {
         double discr = b * b - 4 * a * c;
         double resY1 = (-b + Math.sqrt(Math.abs(discr))) / (2 * a);
         double resX1 = const1 - const2 * resY1;
-        return new Point2D.Double(resX1, resY1);
+        return new Point2D.Double(resX1 + difX, resY1 + difY);
     }
 
     /**
