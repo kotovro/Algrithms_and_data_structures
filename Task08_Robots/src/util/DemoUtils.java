@@ -3,6 +3,7 @@ package util;
 import graph.SimpleWGraph;
 import task08.Task08Solution;
 
+import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
@@ -88,5 +89,20 @@ public class DemoUtils {
             i++;
         }
         return result;
+    }
+    public static Point2D solveQuadraticSystem(Point2D start, Point2D end, double len0, double len1, double difX, double difY) {
+        double x0 = start.getX();
+        double x1 = end.getX();
+        double y0 = start.getY();
+        double y1 = end.getY();
+        double const1 = (x1 * x1 - x0 * x0 + y1 * y1 - y0 * y0 + len0 * len0 - len1 * len1) / (2 * (x1 - x0));
+        double const2 = (y1 - y0) / (x1 - x0);
+        double a = 1 + const2 * const2;
+        double b = 2 * (const2 * x0 - const1 * const2 - y0);
+        double c = const1 * const1 - 2 * x0 * const1 + x0 * x0 + y0 * y0 - len0 * len0;
+        double discr = b * b - 4 * a * c;
+        double resY1 = (-b + Math.sqrt(Math.abs(discr))) / (2 * a);
+        double resX1 = const1 - const2 * resY1;
+        return new Point2D.Double(resX1 + difX, resY1 + difY);
     }
 }

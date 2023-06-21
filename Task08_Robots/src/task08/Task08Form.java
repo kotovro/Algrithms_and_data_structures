@@ -70,6 +70,7 @@ public class Task08Form extends JFrame {
     private SimpleWGraph.GraphEdge selectedEdge = null;
     private EdgeParamsDialog edgeDialog = null;
     private NodeParamsDialog nodeDialog = null;
+    private AnimationControl animationControl = null;
     LinkedList<Task08Solution.Position[]> animation = null;
     int currentAnimationFrame = 0;
     Point2D[] robotPositions = new Point2D[3];
@@ -204,6 +205,7 @@ public class Task08Form extends JFrame {
         buttonGenerateGraph.addActionListener(e -> {
             getRandomGraph();
             initNodesPositions();
+            initStartComboboxes(true);
             initRobotsPositions();
             updateView();
         });
@@ -221,7 +223,87 @@ public class Task08Form extends JFrame {
                 animation = DemoUtils.repack(path);
                 currentAnimationFrame = 0;
                 initRobotsPositions();
+                animationControl = new AnimationControl(event -> {
+                    String cmd = event.getActionCommand();
+                    boolean needStartTimer = false;
+                    if (cmd.equals("stop")) {
+                        if (timer.isRunning()) {
+                            timer.stop();
+                            currentAnimationFrame = 0;
+                            if (animationControl != null) {
+                                animationControl.updateSeekSlider(1);
+                            }
+                        }
+                    } else if (cmd.equals("hardStop")) {
+                        if (timer.isRunning()) {
+                            timer.stop();
+                        }
+                        safeRemoveDialog(animationControl);
+                        initRobotsPositions();
+                        updateView();
+                    } else if (cmd.equals("rewind")) {
+                        if (timer.isRunning()) {
+                            timer.stop();
+                            needStartTimer = true;
+                        }
+                        if (currentAnimationFrame > 1) {
+                            currentAnimationFrame -= 2;
+                            if (needStartTimer) {
+                                timer.start();
+                            } else {
+                                animate();
+                            }
+                        }
+                    } else if (cmd.equals("forward")) {
+                        if (timer.isRunning()) {
+                            timer.stop();
+                            needStartTimer = true;
+                        }
+                        if (currentAnimationFrame < animation.getFirst().length) {
+                            if (needStartTimer) {
+                                timer.start();
+                            } else {
+                                animate();
+                            }
+                        }
+                    } else if (cmd.equals("pause")) {
+                        if (timer.isRunning()) {
+                            timer.stop();
+                        }
+                    }  else if (cmd.equals("resume")) {
+                        if (currentAnimationFrame >= animation.getFirst().length - 1) {
+                            currentAnimationFrame = 0;
+                        }
+                        if (!timer.isRunning()) {
+                            timer.start();
+                        }
+                    } else if (cmd.startsWith("seek")) {
+                        String targetFrame = cmd.split(":")[1];
+                        if (timer.isRunning()) {
+                            needStartTimer = true;
+                            timer.stop();
+                        }
+                        currentAnimationFrame = Integer.parseInt(targetFrame);
+                        if (needStartTimer) {
+                            timer.start();
+                        } else {
+                            animate();
+                        }
+                    } else if (cmd.startsWith("speed")) {
+                        String speed = cmd.split(":")[1];
+                        if (timer.isRunning()) {
+                            needStartTimer = true;
+                            timer.stop();
+                        }
+                        animationDelay = 1000 / Integer.parseInt(speed);
+                        timer.setDelay(animationDelay);
+                        if (needStartTimer) {
+                            timer.start();
+                        }
+                    }
+                }, animation.getFirst().length, 1000 / animationDelay, panelButtons);
                 timer.start();
+                animationControl.setVisible(true);
             } else {
                 SwingUtils.showInfoMessageBox("В таких условиях роботы не могут встретиться.");
             }
@@ -481,7 +563,7 @@ public class Task08Form extends JFrame {
         if (isReInit) {
             comboRobot1Start.setSelectedIndex(combo1Value);
             comboRobot2Start.setSelectedIndex(combo2Value);
-            comboRobot3Start.setSelectedItem(combo3Value);
+            comboRobot3Start.setSelectedIndex(combo3Value);
         }
     }
 
@@ -490,8 +572,12 @@ public class Task08Form extends JFrame {
             if (timer.isRunning()) {
                 timer.stop();
             }
+            if (animationControl != null) {
+                animationControl.setState(true);
+            }
             return;
         }
+
         int robotNum = 0;
         for (Task08Solution.Position[] frames : animation) {
             if (frames.length > 0) {
@@ -511,6 +597,9 @@ public class Task08Form extends JFrame {
             robotNum++;
         }
         currentAnimationFrame++;
+        if (animationControl != null) {
+            animationControl.updateSeekSlider(currentAnimationFrame);
+        }
         updateView();
     }
 
@@ -523,23 +612,7 @@ public class Task08Form extends JFrame {
         double edgeLen = getDistance(startPoint, endPoint);
         double weight = graph.getWeight(position.getStartNode(), position.getTargetNode());
         double distanceLen = edgeLen / weight * position.getDistance();
-        return solveQuadraticSystem(startPoint, endPoint, edgeLen - distanceLen, distanceLen, difX, difY);
-    }
-
-    private Point2D solveQuadraticSystem(Point2D start, Point2D end, double len0, double len1, double difX, double difY) {
-        double x0 = start.getX();
-        double x1 = end.getX();
-        double y0 = start.getY();
-        double y1 = end.getY();
-        double const1 = (x1 * x1 - x0 * x0 + y1 * y1 - y0 * y0 + len0 * len0 - len1 * len1) / (2 * (x1 - x0));
-        double const2 = (y1 - y0) / (x1 - x0);
-        double a = 1 + const2 * const2;
-        double b = 2 * (const2 * x0 - const1 * const2 - y0);
-        double c = const1 * const1 - 2 * x0 * const1 + x0 * x0 + y0 * y0 - len0 * len0;
-        double discr = b * b - 4 * a * c;
-        double resY1 = (-b + Math.sqrt(Math.abs(discr))) / (2 * a);
-        double resX1 = const1 - const2 * resY1;
-        return new Point2D.Double(resX1 + difX, resY1 + difY);
+        return DemoUtils.solveQuadraticSystem(startPoint, endPoint, edgeLen - distanceLen, distanceLen, difX, difY);
     }
 
     /**
