@@ -30,26 +30,7 @@ public interface WeightedGraph extends Graph {
      * @return Объект, поддерживающий итерацию по номерам связанных с v вершин
      */
     Iterable<WeightedEdgeTo> adjacenciesWithWeights(int v);
-    @Override
-    default Iterable<Integer> adjacencies(int v) {
-        return new Iterable<>() {
-            private Iterable<WeightedEdgeTo> iterable = adjacenciesWithWeights(v);
 
-            @Override
-            public Iterator<Integer> iterator() {
-                return new Iterator<>() {
-                    @Override
-                    public boolean hasNext() {
-                        return iterable.iterator().hasNext();
-                    }
-
-                    public Integer next() {
-                        return iterable.iterator().next().to();
-                    }
-                };
-            }
-        };
-    }
     /**
      * Вес ребра между вершинами v1 и v2
      * @param v1

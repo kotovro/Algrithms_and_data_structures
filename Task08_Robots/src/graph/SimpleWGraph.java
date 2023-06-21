@@ -103,7 +103,25 @@ public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
         adjMatrix[edge.from()][edge.to()] = edge.weight();
         adjMatrix[edge.to()][edge.from()] = edge.weight();
     }
+    @Override
+    public Iterable<Integer> adjacencies(int v) {
+        return new Iterable<>() {
+            @Override
+            public Iterator<Integer> iterator() {
+                return new Iterator<>() {
+                    Iterator<WeightedEdgeTo> iterator = adjacenciesWithWeights(v).iterator();
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext();
+                    }
 
+                    public Integer next() {
+                        return iterator.next().to();
+                    }
+                };
+            }
+        };
+    }
 
 
 }

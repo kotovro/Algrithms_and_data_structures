@@ -262,7 +262,7 @@
                       </grid>
                     </constraints>
                     <properties>
-                      <text value="12"/>
+                      <text value="5"/>
                     </properties>
                   </component>
                   <component id="5e1e8" class="javax.swing.JLabel">
@@ -280,7 +280,7 @@
                       </grid>
                     </constraints>
                     <properties>
-                      <text value="0.4"/>
+                      <text value="0.8"/>
                     </properties>
                   </component>
                   <component id="8ecbb" class="javax.swing.JButton" binding="buttonGenerateGraph">

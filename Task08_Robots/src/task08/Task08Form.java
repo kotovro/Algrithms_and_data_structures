@@ -7,8 +7,6 @@ import graph.SimpleWGraph;
 import util.DemoUtils;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -21,6 +19,10 @@ import java.util.Random;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
+
+import util.*;
+
+import static javax.swing.JOptionPane.showMessageDialog;
 
 
 public class Task08Form extends JFrame {
@@ -91,33 +93,15 @@ public class Task08Form extends JFrame {
         //contentPanel.add(contextRender);
         $$$setupUI$$$();
         contentPanel.setSize(width + padding * 2, height + padding * 2);
+        panelMain.setSize(900, 900);
         //panelButtons.setSize(300, 300);
 
         getRandomGraph();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(true);
         this.setContentPane(panelMain);
-        //take advantage of auto-sizing the window based on the size of its contents
-        this.setLocationRelativeTo(null);
 
-        DefaultComboBoxModel cmbR1StartModel = new DefaultComboBoxModel<>();
-        DefaultComboBoxModel cmbR2StartModel = new DefaultComboBoxModel<>();
-        DefaultComboBoxModel cmbR3StartModel = new DefaultComboBoxModel<>();
-
-
-        cmbR3StartModel.addElement("-");
-
-        for (int i = 0; i < graph.vertexCount(); i++) {
-            cmbR1StartModel.addElement("" + i);
-            cmbR2StartModel.addElement("" + i);
-            cmbR3StartModel.addElement("" + i);
-        }
-        comboRobot1Start.setModel(cmbR1StartModel);
-        comboRobot2Start.setModel(cmbR2StartModel);
-        comboRobot3Start.setModel(cmbR3StartModel);
-        initNodesPositions();
-        this.pack();
-
+        initStartComboboxes(false);
         contextRender.addMouseMotionListener(new MouseInputAdapter() {
             public void mouseDragged(MouseEvent e) {
                 if (selectedNodeIndex > -1) {
@@ -158,6 +142,7 @@ public class Task08Form extends JFrame {
                         nodeDialog = new NodeParamsDialog(true, (evt) -> {
                             graph = DemoUtils.removeNode(graph, tmpNodeIndex);
                             removeNodeFromGraphics(tmpNodeIndex);
+                            initStartComboboxes(true);
                             selectedNodeIndex = -1;
                             updateView();
                         });
@@ -189,6 +174,7 @@ public class Task08Form extends JFrame {
                         nodeDialog = new NodeParamsDialog(false, (evt) -> {
                             graph = DemoUtils.addNode(graph);
                             addNodeToGraphics(point);
+                            initStartComboboxes(true);
                             updateView();
                         });
                         nodeDialog.setVisible(true);
@@ -197,6 +183,7 @@ public class Task08Form extends JFrame {
                         nodeDialog = new NodeParamsDialog(true, (evt) -> {
                             graph = DemoUtils.removeNode(graph, tmpNodeIndex);
                             removeNodeFromGraphics(tmpNodeIndex);
+                            initStartComboboxes(true);
                             updateView();
                         });
                         nodeDialog.setVisible(true);
@@ -205,14 +192,13 @@ public class Task08Form extends JFrame {
                 }
             }
         });
-        this.paint();
-        setVisible(true);
+
         buttonGenerateGraph.addActionListener(e -> {
             getRandomGraph();
             initNodesPositions();
             updateView();
         });
-        buttonRun.addActionListener(e ->  {
+        buttonRun.addActionListener(e -> {
             int startPos1 = comboRobot1Start.getSelectedIndex();
             int startPos2 = comboRobot2Start.getSelectedIndex();
             int startPos3 = comboRobot3Start.getSelectedIndex() - 1;
@@ -222,8 +208,18 @@ public class Task08Form extends JFrame {
             Task08Solution.Path[] path = Task08Solution.getSolution(graph,
                     startPos1, startPos2, startPos3,
                     speed1, speed2, speed3);
-            LinkedList<Task08Solution.Position[]> animation = DemoUtils.repack(path);
+            if (path != null) {
+                LinkedList<Task08Solution.Position[]> animation = DemoUtils.repack(path);
+            } else {
+                SwingUtils.showInfoMessageBox("В таких условиях роботы не могут встретиться.");
+            }
         });
+
+        initNodesPositions();
+        this.pack();
+        this.setLocationRelativeTo(null);
+        this.paint();
+        setVisible(true);
     }
 
     private void getRandomGraph() {
@@ -383,7 +379,7 @@ public class Task08Form extends JFrame {
         Point2D areaCenter = new Point2D.Double((double) width / 2 + padding, (double) height / 2 + padding);
 
         int radius = Math.min(height / 2, width / 2) / 3;
-        int nodesCount = Math.max(3, Math.ceilDiv(graph.vertexCount(), 5));
+        int nodesCount = Math.max(Math.min(3, graph.vertexCount()), Math.ceilDiv(graph.vertexCount(), 5));
         nodePositions = new Point2D[graph.vertexCount()];
         generateNodesCircle(areaCenter, radius, nodesCount, 0);
         generateNodesCircle(areaCenter, radius * 2, Math.min(nodesCount * 2, graph.vertexCount() - nodesCount), nodesCount);
@@ -411,6 +407,39 @@ public class Task08Form extends JFrame {
         }
         tmp[graph.vertexCount() - 1] = newNodePosition;
         nodePositions = tmp;
+    }
+    private void initStartComboboxes(boolean isReInit) {
+        int combo1Value = -1;
+        int combo2Value = -1;
+        int combo3Value = -1;
+        if (isReInit) {
+            int maxValue = graph.vertexCount() - 1;
+            combo1Value = Math.min(comboRobot1Start.getSelectedIndex(), maxValue);
+            combo2Value = Math.min(comboRobot2Start.getSelectedIndex(), maxValue);
+            combo3Value = Math.min(comboRobot3Start.getSelectedIndex(), maxValue + 1);
+        }
+        DefaultComboBoxModel cmbR1StartModel = new DefaultComboBoxModel<>();
+        DefaultComboBoxModel cmbR2StartModel = new DefaultComboBoxModel<>();
+        DefaultComboBoxModel cmbR3StartModel = new DefaultComboBoxModel<>();
+
+
+        cmbR3StartModel.addElement("-");
+
+        for (int i = 0; i < graph.vertexCount(); i++) {
+            cmbR1StartModel.addElement("" + i);
+            cmbR2StartModel.addElement("" + i);
+            cmbR3StartModel.addElement("" + i);
+        }
+
+        comboRobot1Start.setModel(cmbR1StartModel);
+        comboRobot2Start.setModel(cmbR2StartModel);
+        comboRobot3Start.setModel(cmbR3StartModel);
+
+        if (isReInit) {
+            comboRobot1Start.setSelectedIndex(combo1Value);
+            comboRobot2Start.setSelectedIndex(combo2Value);
+            comboRobot3Start.setSelectedItem(combo3Value);
+        }
     }
 
     /**
@@ -520,13 +549,13 @@ public class Task08Form extends JFrame {
         panelGraph.setLayout(new GridLayoutManager(5, 3, new Insets(0, 0, 0, 0), -1, -1));
         panelButtons.add(panelGraph, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         textFieldVertexCount = new JTextField();
-        textFieldVertexCount.setText("12");
+        textFieldVertexCount.setText("5");
         panelGraph.add(textFieldVertexCount, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label10 = new JLabel();
         label10.setText("Количество вершин:");
         panelGraph.add(label10, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         textFieldProbability = new JTextField();
-        textFieldProbability.setText("0.4");
+        textFieldProbability.setText("0.8");
         panelGraph.add(textFieldProbability, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         buttonGenerateGraph = new JButton();
         buttonGenerateGraph.setText("Сгенерировать случайный граф");

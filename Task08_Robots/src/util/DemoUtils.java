@@ -3,7 +3,6 @@ package util;
 import graph.SimpleWGraph;
 import task08.Task08Solution;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
