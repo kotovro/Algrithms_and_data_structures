@@ -7,6 +7,8 @@ import graph.SimpleWGraph;
 import util.DemoUtils;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -14,12 +16,18 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import util.*;
 
@@ -64,6 +72,9 @@ public class Task08Form extends JFrame {
     private JTextField textFieldMaxWeight;
     private JTextField textFieldMinWeight;
     private JTextField textFieldVertexCount;
+    private JButton buttonLoadFromFile;
+    private JPanel filePanel;
+    private JButton buttonSaveToFile;
 
     private JScrollPane scrollPane;
     private SimpleWGraph graph;
@@ -71,6 +82,9 @@ public class Task08Form extends JFrame {
     private EdgeParamsDialog edgeDialog = null;
     private NodeParamsDialog nodeDialog = null;
     private AnimationControl animationControl = null;
+    private JFileChooser fileChooserTxtOpen;
+    private JFileChooser fileChooserTxtSave;
+
     LinkedList<Task08Solution.Position[]> animation = null;
     int currentAnimationFrame = 0;
     Point2D[] robotPositions = new Point2D[3];
@@ -109,6 +123,20 @@ public class Task08Form extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(true);
         this.setContentPane(panelMain);
+        fileChooserTxtOpen = new JFileChooser();
+        fileChooserTxtSave = new JFileChooser();
+        fileChooserTxtOpen.setCurrentDirectory(new File("./files/input"));
+        fileChooserTxtSave.setCurrentDirectory(new File("./files/input"));
+        FileFilter txtFilter = new FileNameExtensionFilter("Text files (*.txt)", "txt");
+        //FileFilter pngFilter = new FileNameExtensionFilter("PNG images (*.png)", "png");
+
+        fileChooserTxtOpen.addChoosableFileFilter(txtFilter);
+        fileChooserTxtSave.addChoosableFileFilter(txtFilter);
+        //fileChooserImgSave.addChoosableFileFilter(pngFilter);
+
+        fileChooserTxtSave.setAcceptAllFileFilterUsed(false);
+        fileChooserTxtSave.setDialogType(JFileChooser.SAVE_DIALOG);
+        fileChooserTxtSave.setApproveButtonText("Save");
 
         initStartComboboxes(false);
         contextRender.addMouseMotionListener(new MouseInputAdapter() {
@@ -118,7 +146,7 @@ public class Task08Form extends JFrame {
                     selectedNodeIndex = -1;
                 }
                 if (draggingNodeIndex > -1) {
-                    if (e.getX() <= width + padding && e.getX() >= padding && e.getY() >= padding && e.getY() <= padding + height) {
+                    if (e.getX() <= width + nodeRadius && e.getX() >= nodeRadius && e.getY() >= nodeRadius && e.getY() <= nodeRadius + height) {
                         nodePositions[draggingNodeIndex] = new Point2D.Double(e.getX(), e.getY());
                     } else {
                         draggingNodeIndex = -1;
@@ -270,7 +298,7 @@ public class Task08Form extends JFrame {
                         if (timer.isRunning()) {
                             timer.stop();
                         }
-                    }  else if (cmd.equals("resume")) {
+                    } else if (cmd.equals("resume")) {
                         if (currentAnimationFrame >= animation.getFirst().length - 1) {
                             currentAnimationFrame = 0;
                         }
@@ -314,6 +342,33 @@ public class Task08Form extends JFrame {
         this.setLocationRelativeTo(null);
         this.paint();
         setVisible(true);
+        buttonLoadFromFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (fileChooserTxtOpen.showOpenDialog(Task08Form.this) == JFileChooser.APPROVE_OPTION) {
+                    double[][] matrix = ArrayUtils.readDoubleArray2FromFile(fileChooserTxtOpen.getSelectedFile().getPath());
+                    if (matrix != null) {
+                        graph = new SimpleWGraph(matrix);
+                        initNodesPositions();
+                        initStartComboboxes(true);
+                        initRobotsPositions();
+                        updateView();
+                    }
+                }
+            }
+        });
+        buttonSaveToFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (fileChooserTxtSave.showSaveDialog(Task08Form.this) == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        ArrayUtils.writeArrayToFile(fileChooserTxtSave.getSelectedFile().getPath(), graph.getAdjMatrix());
+                    } catch (FileNotFoundException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
     }
 
     private void initRobotsPositions() {
@@ -635,7 +690,7 @@ public class Task08Form extends JFrame {
         final Spacer spacer1 = new Spacer();
         contentPanel.add(spacer1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         panelButtons = new JPanel();
-        panelButtons.setLayout(new GridLayoutManager(7, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.setLayout(new GridLayoutManager(8, 1, new Insets(0, 0, 0, 0), -1, -1));
         splitPane1.setLeftComponent(panelButtons);
         panelRobot3 = new JPanel();
         panelRobot3.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
@@ -707,17 +762,15 @@ public class Task08Form extends JFrame {
         label9.setText("Робот 1");
         panelRobot1.add(label9, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JSeparator separator1 = new JSeparator();
-        panelButtons.add(separator1, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panelButtons.add(separator1, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         panelAnimation = new JPanel();
-        panelAnimation.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panelButtons.add(panelAnimation, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panelAnimation.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.add(panelAnimation, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         buttonRun = new JButton();
-        buttonRun.setText("Запустить");
-        panelAnimation.add(buttonRun, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        buttonRun.setText("Запустить поиск решения");
+        panelAnimation.add(buttonRun, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        panelAnimation.add(spacer2, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        panelAnimation.add(spacer3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panelAnimation.add(spacer2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         panelGraph = new JPanel();
         panelGraph.setLayout(new GridLayoutManager(5, 3, new Insets(0, 0, 0, 0), -1, -1));
         panelButtons.add(panelGraph, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -748,14 +801,23 @@ public class Task08Form extends JFrame {
         final JLabel label13 = new JLabel();
         label13.setText("Максимальный вес");
         panelGraph.add(label13, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer3 = new Spacer();
+        panelGraph.add(spacer3, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
-        panelGraph.add(spacer4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panelGraph.add(spacer4, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer5 = new Spacer();
-        panelGraph.add(spacer5, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panelGraph.add(spacer5, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer6 = new Spacer();
-        panelGraph.add(spacer6, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer7 = new Spacer();
-        panelGraph.add(spacer7, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panelGraph.add(spacer6, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        filePanel = new JPanel();
+        filePanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panelButtons.add(filePanel, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        buttonLoadFromFile = new JButton();
+        buttonLoadFromFile.setText("Загрузить граф");
+        filePanel.add(buttonLoadFromFile, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        buttonSaveToFile = new JButton();
+        buttonSaveToFile.setText("Сохранить граф");
+        filePanel.add(buttonSaveToFile, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

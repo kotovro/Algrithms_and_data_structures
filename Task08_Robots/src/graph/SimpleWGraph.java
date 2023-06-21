@@ -122,6 +122,9 @@ public class SimpleWGraph extends AdjMatrixGraph implements WeightedGraph {
             }
         };
     }
+    public double[][] getAdjMatrix() {
+        return this.adjMatrix;
+    }
 
 
 }
