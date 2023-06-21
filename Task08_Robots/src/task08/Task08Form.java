@@ -125,8 +125,8 @@ public class Task08Form extends JFrame {
         this.setContentPane(panelMain);
         fileChooserTxtOpen = new JFileChooser();
         fileChooserTxtSave = new JFileChooser();
-        fileChooserTxtOpen.setCurrentDirectory(new File("./files/input"));
-        fileChooserTxtSave.setCurrentDirectory(new File("./files/input"));
+        fileChooserTxtOpen.setCurrentDirectory(new File("./tests"));
+        fileChooserTxtSave.setCurrentDirectory(new File("./tests"));
         FileFilter txtFilter = new FileNameExtensionFilter("Text files (*.txt)", "txt");
         //FileFilter pngFilter = new FileNameExtensionFilter("PNG images (*.png)", "png");
 
@@ -134,7 +134,8 @@ public class Task08Form extends JFrame {
         fileChooserTxtSave.addChoosableFileFilter(txtFilter);
         //fileChooserImgSave.addChoosableFileFilter(pngFilter);
 
-        fileChooserTxtSave.setAcceptAllFileFilterUsed(false);
+        fileChooserTxtSave.setAcceptAllFileFilterUsed(true);
+        fileChooserTxtOpen.setAcceptAllFileFilterUsed(true);
         fileChooserTxtSave.setDialogType(JFileChooser.SAVE_DIALOG);
         fileChooserTxtSave.setApproveButtonText("Save");
 
@@ -146,7 +147,7 @@ public class Task08Form extends JFrame {
                     selectedNodeIndex = -1;
                 }
                 if (draggingNodeIndex > -1) {
-                    if (e.getX() <= width + nodeRadius && e.getX() >= nodeRadius && e.getY() >= nodeRadius && e.getY() <= nodeRadius + height) {
+                    if (e.getX() <= width + padding * 2  - nodeRadius && e.getX() >= nodeRadius && e.getY() >= nodeRadius && e.getY() <= padding * 2 - nodeRadius  + height) {
                         nodePositions[draggingNodeIndex] = new Point2D.Double(e.getX(), e.getY());
                     } else {
                         draggingNodeIndex = -1;
