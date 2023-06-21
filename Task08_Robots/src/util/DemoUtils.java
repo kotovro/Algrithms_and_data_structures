@@ -3,6 +3,7 @@ package util;
 import graph.SimpleWGraph;
 import task08.Task08Solution;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -67,7 +68,7 @@ public class DemoUtils {
         LinkedList<Task08Solution.Position[]> res = new LinkedList<>();
         for(Task08Solution.Path p: path) {
             LinkedList<Task08Solution.Position> list = new LinkedList<>();
-            res.add(listToArray(repack(p, list)));
+            res.add(listToArrayReversed(repack(p, list)));
         }
         return res;
     }
@@ -78,7 +79,14 @@ public class DemoUtils {
         }
         return result;
     }
-    public static  Task08Solution.Position[] listToArray(LinkedList<Task08Solution.Position> list) {
-        return list.toArray(new Task08Solution.Position[0]);
+    public static  Task08Solution.Position[] listToArrayReversed(LinkedList<Task08Solution.Position> list) {
+        Iterator<Task08Solution.Position> iterator = list.descendingIterator();
+        Task08Solution.Position[] result = new Task08Solution.Position[list.size()];
+        int i = 0;
+        while (iterator.hasNext()) {
+            result[i] = iterator.next();
+            i++;
+        }
+        return result;
     }
 }

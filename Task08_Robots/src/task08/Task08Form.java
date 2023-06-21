@@ -14,6 +14,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -69,6 +70,13 @@ public class Task08Form extends JFrame {
     private SimpleWGraph.GraphEdge selectedEdge = null;
     private EdgeParamsDialog edgeDialog = null;
     private NodeParamsDialog nodeDialog = null;
+    LinkedList<Task08Solution.Position[]> animation = null;
+    int currentAnimationFrame = 0;
+    Point2D[] robotPositions = new Point2D[3];
+    private int animationDelay = 500;
+    private Timer timer = new Timer(animationDelay, ae -> animate());
+
+
     //private NodeParamsDialog nodeDialogParams = new NodeParamsDialog();
 
     public static void main(String[] args) {
@@ -196,6 +204,7 @@ public class Task08Form extends JFrame {
         buttonGenerateGraph.addActionListener(e -> {
             getRandomGraph();
             initNodesPositions();
+            initRobotsPositions();
             updateView();
         });
         buttonRun.addActionListener(e -> {
@@ -209,7 +218,10 @@ public class Task08Form extends JFrame {
                     startPos1, startPos2, startPos3,
                     speed1, speed2, speed3);
             if (path != null) {
-                LinkedList<Task08Solution.Position[]> animation = DemoUtils.repack(path);
+                animation = DemoUtils.repack(path);
+                currentAnimationFrame = 0;
+                initRobotsPositions();
+                timer.start();
             } else {
                 SwingUtils.showInfoMessageBox("В таких условиях роботы не могут встретиться.");
             }
@@ -222,12 +234,21 @@ public class Task08Form extends JFrame {
         setVisible(true);
     }
 
+    private void initRobotsPositions() {
+        Arrays.fill(robotPositions, null);
+    }
+
     private void getRandomGraph() {
         int vertexCount = Integer.parseInt(textFieldVertexCount.getText());
         double probability = Double.parseDouble(textFieldProbability.getText());
         int minWeight = Integer.parseInt(textFieldMinWeight.getText());
         int maxWeight = Integer.parseInt(textFieldMaxWeight.getText());
-        graph = DemoUtils.createTestGraph(vertexCount, probability, minWeight, maxWeight);
+        try {
+            graph = DemoUtils.createTestGraph(vertexCount, probability, minWeight, maxWeight);
+        } catch (Exception ex) {
+            SwingUtils.showErrorMessageBox(ex);
+        }
+
     }
 
     private void safeRemoveDialog(JDialog dialog) {
@@ -293,12 +314,33 @@ public class Task08Form extends JFrame {
         g2d.fillRect(0, 0, graphicsContext.getWidth(), graphicsContext.getHeight());
 
         drawEdges(nodePositions, selectedEdge, graph, g2d, fontMetrics);
+        drawRobots(robotPositions, g2d);
         drawNodesCircle(nodePositions, nodeRadius, g2d, fontMetrics, selectedNodeIndex);
 
         g2d.dispose();
         //force the container for the context to re-paint itself
         contextRender.repaint();
 
+    }
+
+    private void drawRobots(Point2D[] robotPositions, Graphics2D g2d) {
+        int i = 0;
+        while (i < robotPositions.length) {
+            if (robotPositions[i] == null) {
+                i++;
+                continue;
+            }
+            Ellipse2D robotCircle = getCircleByCenter(robotPositions[i], nodeRadius);
+            if (i == 0) {
+                g2d.setColor(Color.green);
+            } else if (i == 1) {
+                g2d.setColor(Color.blue);
+            } else {
+                g2d.setColor(Color.magenta);
+            }
+            g2d.fill(robotCircle);
+            i++;
+        }
     }
 
     private void generateNodesCircle(Point2D centerPoint, int radius, int nodesCount, int startIndex) {
@@ -408,6 +450,7 @@ public class Task08Form extends JFrame {
         tmp[graph.vertexCount() - 1] = newNodePosition;
         nodePositions = tmp;
     }
+
     private void initStartComboboxes(boolean isReInit) {
         int combo1Value = -1;
         int combo2Value = -1;
@@ -440,6 +483,52 @@ public class Task08Form extends JFrame {
             comboRobot2Start.setSelectedIndex(combo2Value);
             comboRobot3Start.setSelectedItem(combo3Value);
         }
+    }
+
+    private void animate() {
+        if (currentAnimationFrame >= animation.getFirst().length) {
+            if (timer.isRunning()) {
+                timer.stop();
+            }
+            return;
+        }
+        int robotNum = 0;
+        for (Task08Solution.Position[] frames : animation) {
+            if (frames.length > 0) {
+                robotPositions[robotNum] = calculateRobotPosition(frames[currentAnimationFrame]);
+            }
+            robotNum++;
+        }
+        currentAnimationFrame++;
+        updateView();
+    }
+
+    private Point2D calculateRobotPosition(Task08Solution.Position position) {
+        Point2D endPoint = nodePositions[position.getTargetNode()];
+        if (position.getDistance() == 0) {
+            return endPoint;
+        }
+        Point2D startPoint = nodePositions[position.getStartNode()];
+        double edgeLen = getDistance(startPoint, endPoint);
+        double weight = graph.getWeight(position.getStartNode(), position.getTargetNode());
+        double distanceLen = edgeLen / weight * position.getDistance();
+        return solveQuadraticSystem(startPoint, endPoint, edgeLen - distanceLen, distanceLen);
+    }
+
+    private Point2D solveQuadraticSystem(Point2D start, Point2D end, double len0, double len1) {
+        double x0 = start.getX();
+        double x1 = end.getX();
+        double y0 = start.getY();
+        double y1 = end.getY();
+        double const1 = (x1 * x1 - x0 * x0 + y1 * y1 - y0 * y0 + len0 * len0 - len1 * len1) / (2 * (x1 - x0));
+        double const2 = (y1 - y0) / (x1 - x0);
+        double a = 1 + const2 * const2;
+        double b = 2 * (const2 * x0 - const1 * const2 - y0);
+        double c = const1 * const1 - 2 * x0 * const1 + x0 * x0 + y0 * y0 - len0 * len0;
+        double discr = b * b - 4 * a * c;
+        double resY1 = (-b + Math.sqrt(Math.abs(discr))) / (2 * a);
+        double resX1 = const1 - const2 * resY1;
+        return new Point2D.Double(resX1, resY1);
     }
 
     /**
