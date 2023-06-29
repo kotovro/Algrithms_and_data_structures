@@ -212,6 +212,7 @@ public class Task08Solution {
         return true;
     }
 
+
     private static AllPositionsAtOneMoment doOneStep(SimpleWGraph graph, LinkedList<AllPositionsAtOneMoment> list, int speed) {
         AllPositionsAtOneMoment curMoment = list.getLast();
         AllPositionsAtOneMoment newMoment = new AllPositionsAtOneMoment();

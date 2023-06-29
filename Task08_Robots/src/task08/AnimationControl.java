@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class AnimationControl extends JDialog {
+
     private JPanel contentPane;
     private JButton buttonStop;
     private JSlider sliderAnimationSpeed;
@@ -31,6 +32,8 @@ public class AnimationControl extends JDialog {
         sliderAnimationSpeed.setValue(animationSpeed);
 
 
+        // may implement OWN CLASS for events with own ways of event handling, then link to with my main form class. Instead of hardcoding the strings with names of events,
+        // may implement fields in class for each action, so that they may contain numbers to make comparisons of arguments easier
         buttonStop.addActionListener(e -> {
             buttonStop.setEnabled(false);
             //buttonPause.setEnabled(false);
