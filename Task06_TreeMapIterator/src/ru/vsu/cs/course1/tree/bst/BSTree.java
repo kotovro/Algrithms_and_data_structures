@@ -196,12 +196,12 @@ public interface BSTree<T extends Comparable<? super T>> extends BinaryTree<T> {
                         } else {
                             BinaryTree.TreeNode<T> res = findNextNode(node.getLeft());
                             if (res != null) {
-                                if (node.getValue().compareTo(valueTo) < 1) {
+                                if (node.getValue().compareTo(valueTo) <= 0) {
                                     stack.push(node);
                                 }
                                 return res;
                             } else {
-                                if (node.getValue().compareTo(valueTo) < 1) {
+                                if (node.getValue().compareTo(valueTo) <= 0) {
                                     return node;
                                 } else {
                                     return null;
