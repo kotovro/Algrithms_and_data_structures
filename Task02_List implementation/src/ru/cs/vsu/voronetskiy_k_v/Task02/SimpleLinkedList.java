@@ -163,11 +163,11 @@ public class SimpleLinkedList<T> implements Iterable<T> {
         }
     }
 
-    public T[] listToArray(SimpleLinkedList<T> list) {
-        T value = list.head.value;
-        T[] res  = (T[]) Array.newInstance(value.getClass().getComponentType(), list.size());
+    public T[] listToArray() {
+        T value = this.head.value;
+        T[] res  = (T[]) Array.newInstance(value.getClass(), this.size());
         int i = 0;
-        for (T node: list) {
+        for (T node: this) {
             res[i] = node;
             i++;
         }
@@ -212,7 +212,7 @@ public class SimpleLinkedList<T> implements Iterable<T> {
 
     public SimpleLinkedList<Double> getSolution() {
         T value = this.head.value;
-        Double[] resArray = (Double[]) Array.newInstance(value.getClass().getComponentType(), this.size());
+        Double[] resArray = (Double[]) Array.newInstance(value.getClass(), this.size());
         int i = 0;
         for (T el: this)
         {
@@ -220,6 +220,7 @@ public class SimpleLinkedList<T> implements Iterable<T> {
                 resArray[i] = (resArray[i - 1] + (Double)el);
             else
                 resArray[i] = (Double) el;
+            i += 1;
         }
         return new SimpleLinkedList<>(resArray);
     }
@@ -244,4 +245,5 @@ public class SimpleLinkedList<T> implements Iterable<T> {
 
         return new SimpleLinkedListIterator();
     }
+
 }

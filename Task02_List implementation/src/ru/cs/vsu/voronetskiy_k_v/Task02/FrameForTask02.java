@@ -22,6 +22,7 @@ public class FrameForTask02 extends JFrame {
     private JTextArea textArreForResult;
 
     private double[] inArr;
+    private double[] outArr;
     private JFileChooser fileChooserOpen;
     private JFileChooser fileChooserSave;
 
@@ -68,10 +69,9 @@ public class FrameForTask02 extends JFrame {
                     }
                 }
                 SimpleLinkedList<Double> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(inArr));
-//                SimpleLinkedList<Double>.SimpleLinkedListNode<Double> res = temp.getSolution(val ->
-//                        Integer.compare(val, 0)
-//                );//
-                textArreForResult.setText(res.value.toString());
+                SimpleLinkedList<Double> res = temp.getSolution();
+                outArr = ArrayUtils.toPrimitive(res.listToArray());
+                textArreForResult.setText(ArrayUtils.toString(outArr));
             }
         });
         this.pack();
@@ -95,8 +95,7 @@ public class FrameForTask02 extends JFrame {
                 try {
                     if (fileChooserSave.showSaveDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
                         inArr = JTableUtils.readDoubleArrayFromJTable(tableForInputArr);
-                        ArrayUtils.writeArrayToFile(fileChooserSave.getSelectedFile().getPath(), inArr);
-                        ///maybe save res to file
+                        ArrayUtils.writeArrayToFile(fileChooserSave.getSelectedFile().getPath(), outArr);
                     }
                 } catch (Exception ex) {};
             }

@@ -30,9 +30,9 @@ public class ConsoleApp {
                 System.err.println("Unexpected error");
             }
         } else {
-            int result = RunSolution.runSolution(ia.inFile, ia.outFile);
-            System.out.println(result);
-            if (result < 0) {
+            SimpleLinkedList<Double> result = RunSolution.runSolution(ia.inFile, ia.outFile);
+            System.out.println(ArrayUtils.toString(ArrayUtils.toPrimitive(result.listToArray())));
+            if (result == null) {
                 System.err.println("File IO error.");
             }
             //return result;
