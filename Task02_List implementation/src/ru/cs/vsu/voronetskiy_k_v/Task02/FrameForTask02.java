@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 
 
 public class FrameForTask02 extends JFrame {
@@ -17,9 +18,10 @@ public class FrameForTask02 extends JFrame {
     private JButton runSolution;
     private JScrollPane paneForInput;
     private JPanel buttonsPanel;
+    private JScrollPane paneForResult;
     private JButton buttonSave;
     private JButton buttonOpen;
-    private JTextArea textArreForResult;
+    private JTable tableForOutArray;
 
     private double[] inArr;
     private double[] outArr;
@@ -51,27 +53,27 @@ public class FrameForTask02 extends JFrame {
         menuBarMain.add(menuLookAndFeel);
         SwingUtils.initLookAndFeelMenu(menuLookAndFeel);
 
+        JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, true);
+        JTableUtils.initJTableForArray(tableForOutArray, 40, false, false, false, false);
         if (inFile != null && inFile.length() > 0) {
-            JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, false);
             inArr = ArrayUtils.readDoubleArrayFromFile(inFile);
             JTableUtils.writeArrayToJTable(tableForInputArr, inArr);
         } else {
-            JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, true);
-        }
+            }
         tableForInputArr.setRowHeight(25);
         runSolution.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (inFile == null || inFile.length() == 0) {
-                    try {
-                        inArr = JTableUtils.readDoubleArrayFromJTable(tableForInputArr);
-                    } catch (Exception ex) {
-                    }
+                try {
+                    inArr = JTableUtils.readDoubleArrayFromJTable(tableForInputArr);
+                } catch (ParseException ex) {
+                    throw new RuntimeException(ex);
                 }
+
                 SimpleLinkedList<Double> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(inArr));
                 SimpleLinkedList<Double> res = temp.getSolution();
                 outArr = ArrayUtils.toPrimitive(res.listToArray());
-                textArreForResult.setText(ArrayUtils.toString(outArr));
+                JTableUtils.writeArrayToJTable(tableForOutArray, outArr);
             }
         });
         this.pack();
@@ -80,7 +82,6 @@ public class FrameForTask02 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (fileChooserOpen.showOpenDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, false);
                         inArr = ArrayUtils.readDoubleArrayFromFile(fileChooserOpen.getSelectedFile().getPath());
                         JTableUtils.writeArrayToJTable(tableForInputArr, inArr);
                     }
