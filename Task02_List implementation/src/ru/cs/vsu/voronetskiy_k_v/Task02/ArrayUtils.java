@@ -32,6 +32,18 @@ public class ArrayUtils {
         return result;
     }
 
+    public static Double[] toGeneric(double[] arr) {
+        if (arr == null) {
+            return null;
+        }
+        Double[] result = new Double[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            result[i] = arr[i];
+        }
+        return result;
+    }
+
+
     public static double[] toPrimitive(Double[] arr) {
         if (arr == null) {
             return null;

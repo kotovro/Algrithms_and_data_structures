@@ -21,7 +21,7 @@ public class FrameForTask02 extends JFrame {
     private JButton buttonOpen;
     private JTextArea textArreForResult;
 
-    private int[] inArr;
+    private double[] inArr;
     private JFileChooser fileChooserOpen;
     private JFileChooser fileChooserSave;
 
@@ -52,7 +52,7 @@ public class FrameForTask02 extends JFrame {
 
         if (inFile != null && inFile.length() > 0) {
             JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, false);
-            inArr = ArrayUtils.readIntArrayFromFile(inFile);
+            inArr = ArrayUtils.readDoubleArrayFromFile(inFile);
             JTableUtils.writeArrayToJTable(tableForInputArr, inArr);
         } else {
             JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, true);
@@ -63,14 +63,14 @@ public class FrameForTask02 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (inFile == null || inFile.length() == 0) {
                     try {
-                        inArr = JTableUtils.readIntArrayFromJTable(tableForInputArr);
+                        inArr = JTableUtils.readDoubleArrayFromJTable(tableForInputArr);
                     } catch (Exception ex) {
                     }
                 }
-                SimpleLinkedList<Integer> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(inArr));
-                SimpleLinkedList<Integer>.SimpleLinkedListNode<Integer> res = temp.getSolution(val ->
-                        Integer.compare(val, 0)
-                );
+                SimpleLinkedList<Double> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(inArr));
+//                SimpleLinkedList<Double>.SimpleLinkedListNode<Double> res = temp.getSolution(val ->
+//                        Integer.compare(val, 0)
+//                );//
                 textArreForResult.setText(res.value.toString());
             }
         });
@@ -81,7 +81,7 @@ public class FrameForTask02 extends JFrame {
                 try {
                     if (fileChooserOpen.showOpenDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
                         JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, false);
-                        inArr = ArrayUtils.readIntArrayFromFile(fileChooserOpen.getSelectedFile().getPath());
+                        inArr = ArrayUtils.readDoubleArrayFromFile(fileChooserOpen.getSelectedFile().getPath());
                         JTableUtils.writeArrayToJTable(tableForInputArr, inArr);
                     }
                 } catch (Exception ex1) {
@@ -94,8 +94,9 @@ public class FrameForTask02 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (fileChooserSave.showSaveDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        inArr = JTableUtils.readIntArrayFromJTable(tableForInputArr);
+                        inArr = JTableUtils.readDoubleArrayFromJTable(tableForInputArr);
                         ArrayUtils.writeArrayToFile(fileChooserSave.getSelectedFile().getPath(), inArr);
+                        ///maybe save res to file
                     }
                 } catch (Exception ex) {};
             }
