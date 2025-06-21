@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 
 
 public class FrameForTask02 extends JFrame {
@@ -17,11 +18,13 @@ public class FrameForTask02 extends JFrame {
     private JButton runSolution;
     private JScrollPane paneForInput;
     private JPanel buttonsPanel;
+    private JScrollPane paneForResult;
     private JButton buttonSave;
     private JButton buttonOpen;
-    private JTextArea textArreForResult;
+    private JTable tableForOutArray;
 
-    private int[] inArr;
+    private double[] inArr;
+    private double[] outArr;
     private JFileChooser fileChooserOpen;
     private JFileChooser fileChooserSave;
 
@@ -50,28 +53,27 @@ public class FrameForTask02 extends JFrame {
         menuBarMain.add(menuLookAndFeel);
         SwingUtils.initLookAndFeelMenu(menuLookAndFeel);
 
+        JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, true);
+        JTableUtils.initJTableForArray(tableForOutArray, 40, false, false, false, false);
         if (inFile != null && inFile.length() > 0) {
-            JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, false);
-            inArr = ArrayUtils.readIntArrayFromFile(inFile);
+            inArr = ArrayUtils.readDoubleArrayFromFile(inFile);
             JTableUtils.writeArrayToJTable(tableForInputArr, inArr);
         } else {
-            JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, true);
-        }
+            }
         tableForInputArr.setRowHeight(25);
         runSolution.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (inFile == null || inFile.length() == 0) {
-                    try {
-                        inArr = JTableUtils.readIntArrayFromJTable(tableForInputArr);
-                    } catch (Exception ex) {
-                    }
+                try {
+                    inArr = JTableUtils.readDoubleArrayFromJTable(tableForInputArr);
+                } catch (ParseException ex) {
+                    throw new RuntimeException(ex);
                 }
-                SimpleLinkedList<Integer> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(inArr));
-                SimpleLinkedList<Integer>.SimpleLinkedListNode<Integer> res = temp.getSolution(val ->
-                        Integer.compare(val, 0)
-                );
-                textArreForResult.setText(res.value.toString());
+
+                SimpleLinkedList<Double> temp = new SimpleLinkedList<>(ArrayUtils.toGeneric(inArr));
+                SimpleLinkedList<Double> res = temp.getSolution();
+                outArr = ArrayUtils.toPrimitive(res.listToArray());
+                JTableUtils.writeArrayToJTable(tableForOutArray, outArr);
             }
         });
         this.pack();
@@ -80,8 +82,7 @@ public class FrameForTask02 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (fileChooserOpen.showOpenDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        JTableUtils.initJTableForArray(tableForInputArr, 40, false, false, false, false);
-                        inArr = ArrayUtils.readIntArrayFromFile(fileChooserOpen.getSelectedFile().getPath());
+                        inArr = ArrayUtils.readDoubleArrayFromFile(fileChooserOpen.getSelectedFile().getPath());
                         JTableUtils.writeArrayToJTable(tableForInputArr, inArr);
                     }
                 } catch (Exception ex1) {
@@ -94,8 +95,8 @@ public class FrameForTask02 extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if (fileChooserSave.showSaveDialog(panelMain) == JFileChooser.APPROVE_OPTION) {
-                        inArr = JTableUtils.readIntArrayFromJTable(tableForInputArr);
-                        ArrayUtils.writeArrayToFile(fileChooserSave.getSelectedFile().getPath(), inArr);
+                        inArr = JTableUtils.readDoubleArrayFromJTable(tableForInputArr);
+                        ArrayUtils.writeArrayToFile(fileChooserSave.getSelectedFile().getPath(), outArr);
                     }
                 } catch (Exception ex) {};
             }

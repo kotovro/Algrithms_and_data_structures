@@ -163,11 +163,11 @@ public class SimpleLinkedList<T> implements Iterable<T> {
         }
     }
 
-    public T[] listToArray(SimpleLinkedList<T> list) {
-        T value = list.head.value;
-        T[] res  = (T[]) Array.newInstance(value.getClass().getComponentType(), list.size());
+    public T[] listToArray() {
+        T value = this.head.value;
+        T[] res  = (T[]) Array.newInstance(value.getClass(), this.size());
         int i = 0;
-        for (T node: list) {
+        for (T node: this) {
             res[i] = node;
             i++;
         }
@@ -184,30 +184,45 @@ public class SimpleLinkedList<T> implements Iterable<T> {
         return res;
     }
 
-    public SimpleLinkedListNode<T> getSolution(Function<T, Integer> comparator) {
-        SimpleLinkedListNode<T> curItem = this.head;
-        int maxNegativeCount = 0;
-        int curNegativeCount = 0;
-        SimpleLinkedListNode<T> candidate = null;
-        SimpleLinkedListNode<T> res = null;
-        while (curItem.next != null) {
-            int comparisonRes = comparator.apply(curItem.value);
-            if (comparisonRes >= 0) {
-                if (candidate != null && curNegativeCount >= maxNegativeCount) {
-                    res = candidate;
-                    maxNegativeCount = curNegativeCount;
-                }
-                candidate = comparisonRes > 0 ? curItem : null;
-                curNegativeCount = 0;
-            } else if (candidate != null) {
-                curNegativeCount += 1;
-            }
-            curItem = curItem.next;
+//    public SimpleLinkedListNode<T> getSolution(Function<T, Integer> comparator) {
+//        SimpleLinkedListNode<T> curItem = this.head;
+//        int maxNegativeCount = 0;
+//        int curNegativeCount = 0;
+//        SimpleLinkedListNode<T> candidate = null;
+//        SimpleLinkedListNode<T> res = null;
+//        while (curItem.next != null) {
+//            int comparisonRes = comparator.apply(curItem.value);
+//            if (comparisonRes >= 0) {
+//                if (candidate != null && curNegativeCount >= maxNegativeCount) {
+//                    res = candidate;
+//                    maxNegativeCount = curNegativeCount;
+//                }
+//                candidate = comparisonRes > 0 ? curItem : null;
+//                curNegativeCount = 0;
+//            } else if (candidate != null) {
+//                curNegativeCount += 1;
+//            }
+//            curItem = curItem.next;
+//        }
+//        if (candidate != null && curNegativeCount >= maxNegativeCount) {
+//            res = candidate;
+//        }
+//        return res;
+//    }
+
+    public SimpleLinkedList<Double> getSolution() {
+        T value = this.head.value;
+        Double[] resArray = (Double[]) Array.newInstance(value.getClass(), this.size());
+        int i = 0;
+        for (T el: this)
+        {
+            if (i > 0)
+                resArray[i] = (resArray[i - 1] + (Double)el);
+            else
+                resArray[i] = (Double) el;
+            i += 1;
         }
-        if (candidate != null && curNegativeCount >= maxNegativeCount) {
-            res = candidate;
-        }
-        return res;
+        return new SimpleLinkedList<>(resArray);
     }
 
     @Override
@@ -230,4 +245,5 @@ public class SimpleLinkedList<T> implements Iterable<T> {
 
         return new SimpleLinkedListIterator();
     }
+
 }
